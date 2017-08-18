@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<application xmlns="http://ns.adobe.com/air/application/22.0">
+
+    <id>com.teakio.pushtest</id>
+    <filename>teak-air-cleanroom</filename>
+    <name>Teak Air Test</name>
+    <versionNumber>1.0.1</versionNumber>
+    
+    <initialWindow>
+        <content>teak-air-cleanroom.swf</content>
+        <autoOrients>true</autoOrients>
+        <aspectRatio>any</aspectRatio>
+        <renderMode>cpu</renderMode>
+        <fullScreen>true</fullScreen>
+        <systemChrome>standard</systemChrome>
+    </initialWindow>
+
+    <iPhone>
+        <requestedDisplayResolution>high</requestedDisplayResolution>
+        <Entitlements>
+            <![CDATA[
+                <key>aps-environment</key>
+                <string>production</string>
+
+                <key>com.apple.developer.associated-domains</key>
+                <array>
+                    <string>applinks:teakangrybots.jckpt.me</string>
+                </array>
+            ]]>
+       </Entitlements>
+        <InfoAdditions>
+            <![CDATA[
+                <key>UIDeviceFamily</key>
+                <array>
+                <string>1</string>
+                <string>2</string>
+                </array>
+
+                <key>TeakAppId</key>
+                <string>1136371193060244</string>
+                <key>TeakApiKey</key>
+                <string>1f3850f794b9093864a0778009744d03</string>
+
+                <key>CFBundleURLTypes</key>
+                <array>
+                    <dict>
+                        <key>CFBundleURLSchemes</key>
+                        <array>
+                            <string>fb1136371193060244</string>
+                        </array>
+                        <key>CFBundleURLSchemes</key>
+                        <array>
+                            <string>teak1136371193060244</string>
+                        </array>
+                    </dict>
+                </array>
+
+                <key>FacebookAppID</key>
+                <string>1136371193060244</string>
+
+                <key>NSAppTransportSecurity</key>
+                <dict>
+                    <key>NSExceptionDomains</key>
+                    <dict>
+                        <key>facebook.com</key>
+                        <dict>
+                            <key>NSIncludesSubdomains</key>
+                            <true/>
+                            <key>NSExceptionRequiresForwardSecrecy</key>
+                            <false/>
+                        </dict>
+                        <key>fbcdn.net</key>
+                        <dict>
+                            <key>NSIncludesSubdomains</key>
+                            <true/>
+                            <key>NSExceptionRequiresForwardSecrecy</key>
+                            <false/>
+                        </dict>
+                        <key>akamaihd.net</key>
+                        <dict>
+                            <key>NSIncludesSubdomains</key>
+                            <true/>
+                            <key>NSExceptionRequiresForwardSecrecy</key>
+                            <false/>
+                        </dict>
+                    </dict>
+                </dict>
+                <key>LSApplicationQueriesSchemes</key>
+                <array>
+                    <string>fbapi</string>
+                    <string>fb-messenger-api</string>
+                    <string>fbauth2</string>
+                    <string>fbshareextension</string>
+                </array>
+            ]]>
+        </InfoAdditions>
+    </iPhone>
+    
+    <android>
+        <manifestAdditions>
+            <![CDATA[
+            <manifest android:installLocation="auto">
+            <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="25" />
+
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+            <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+            <permission android:name="com.teakio.pushtest.permission.C2D_MESSAGE" android:protectionLevel="signature"/>
+            <uses-permission android:name="com.teakio.pushtest.permission.C2D_MESSAGE"/>
+            <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+
+            <application android:debuggable="true">
+
+                <activity
+                    android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden|fontScale"
+                    android:label="@string/app_name"
+                    android:launchMode="singleTask"
+                    android:name=".AppEntry"
+                    android:screenOrientation="user"
+                    android:theme="@style/Theme.NoShadow"
+                    android:windowSoftInputMode="adjustResize|stateHidden">
+                    <intent-filter android:autoVerify="true" >
+                        <action android:name="android.intent.action.VIEW" />
+
+                        <category android:name="android.intent.category.DEFAULT" />
+                        <category android:name="android.intent.category.BROWSABLE" />
+
+                        <data
+                            android:host="teakangrybots.jckpt.me"
+                            android:scheme="http" />
+                        <data
+                            android:host="teakangrybots.jckpt.me"
+                            android:scheme="https" />
+                    </intent-filter>
+                    <intent-filter>
+                        <action android:name="android.intent.action.VIEW" />
+
+                        <category android:name="android.intent.category.DEFAULT" />
+                        <category android:name="android.intent.category.BROWSABLE" />
+
+                        <data
+                            android:host="*"
+                            android:scheme="teak1136371193060244" />
+                    </intent-filter>
+                </activity>
+
+                <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+
+                <receiver android:name="io.teak.sdk.Teak" android:exported="true"
+                    android:permission="com.google.android.c2dm.permission.SEND">
+                    <intent-filter>
+                        <action android:name="com.teakio.pushtest.intent.TEAK_NOTIFICATION_OPENED" />
+                        <action android:name="com.teakio.pushtest.intent.TEAK_NOTIFICATION_CLEARED" />
+                        <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                        <category android:name="com.teakio.pushtest" />
+                    </intent-filter>
+                </receiver>
+
+                <meta-data android:name="com.facebook.sdk.ApplicationId" 
+                           android:value="fb1136371193060244"/>
+
+                <activity android:name="com.facebook.FacebookActivity" 
+                          android:theme="@android:style/Theme.Translucent.NoTitleBar" android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation" android:label="Teak Angry Bots" />
+
+                <activity android:name="com.freshplanet.ane.AirFacebook.LoginActivity" 
+                          android:theme="@android:style/Theme.Translucent.NoTitleBar" android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation" />
+
+            </application>
+            </manifest>
+        ]]></manifestAdditions>
+    </android>
+
+    <extensions>
+        <extensionID>io.teak.sdk.Teak</extensionID>
+        <extensionID>com.vungle.extensions.android.GooglePlayServices</extensionID>
+        <extensionID>com.vungle.extensions.android.AndroidSupportLib</extensionID>
+        <extensionID>com.freshplanet.ane.AirFacebook</extensionID>
+    </extensions>
+</application>

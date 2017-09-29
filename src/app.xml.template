@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <application xmlns="http://ns.adobe.com/air/application/22.0">
 
-    <id>com.teakio.pushtest</id>
+    <id>{{bundle_id}}</id>
     <filename>teak-air-cleanroom</filename>
     <name>Teak Air Cleanroom</name>
     <versionNumber>1.0.1</versionNumber>
+
+    <icon> 
+        <image144x144>teak-ea-icon-square-144x144.png</image144x144>
+        <image1024x1024>teak-ea-icon-square-1024x1024.png</image1024x1024>
+    </icon> 
 
     <initialWindow>
         <content>teak-air-cleanroom.swf</content>
@@ -110,8 +115,8 @@
             <uses-permission android:name="android.permission.GET_ACCOUNTS" />
             <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
-            <permission android:name="com.teakio.pushtest.permission.C2D_MESSAGE" android:protectionLevel="signature"/>
-            <uses-permission android:name="com.teakio.pushtest.permission.C2D_MESSAGE"/>
+            <permission android:name="{{bundle_id}}.permission.C2D_MESSAGE" android:protectionLevel="signature"/>
+            <uses-permission android:name="{{bundle_id}}.permission.C2D_MESSAGE"/>
             <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 
             <!-- android:name="io.teak.sdk.Application"  -->
@@ -158,11 +163,11 @@
                 <receiver android:name="io.teak.sdk.Teak" android:exported="true"
                     android:permission="com.google.android.c2dm.permission.SEND">
                     <intent-filter>
-                        <action android:name="com.teakio.pushtest.intent.TEAK_NOTIFICATION_OPENED" />
-                        <action android:name="com.teakio.pushtest.intent.TEAK_NOTIFICATION_CLEARED" />
+                        <action android:name="{{bundle_id}}.intent.TEAK_NOTIFICATION_OPENED" />
+                        <action android:name="{{bundle_id}}.intent.TEAK_NOTIFICATION_CLEARED" />
                         <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                         <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-                        <category android:name="com.teakio.pushtest" />
+                        <category android:name="{{bundle_id}}" />
                     </intent-filter>
                 </receiver>
 

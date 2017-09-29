@@ -1,3 +1,8 @@
+.DS_Store
+*.log
+src/air-repack.config
+src/app.xml
+
 build/
 
 teak-air-cleanroom.ipa

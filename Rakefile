@@ -1,5 +1,6 @@
 require "rake/clean"
 require "shellwords"
+require "mustache"
 CLEAN.include "**/.DS_Store"
 
 desc "Build Adobe Air package"
@@ -10,6 +11,8 @@ ADOBE_AIR_HOME = ENV.fetch('ADOBE_AIR_HOME', '/usr/local/share/adobe-air-sdk')
 PROJECT_PATH = Rake.application.original_dir
 
 KEYS_PATH = ENV.fetch('TEAK_AIR_CLEANROOM_KEYS', File.join(ENV['HOME'], 'teak-air-cleanroom-keys'))
+
+BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'com.teakio.pushtest')
 
 #
 # Helper methods
@@ -56,11 +59,19 @@ namespace :build do
       "src/io/teak/sdk/cleanroom/Test.as", "src/io/teak/sdk/cleanroom/Main.as", "src/Cleanroom.as"
   end
 
-  task :android do
+  task :app_xml do
+    template = File.read(File.join(PROJECT_PATH, 'src', 'app.xml.template'))
+    File.write(File.join(PROJECT_PATH, 'src', 'app.xml'), Mustache.render(template, {
+      bundle_id: BUNDLE_ID
+    }))
+  end
+
+  task android: [:app_xml] do
     adt "-package", "-target", "apk-captive-runtime", "-keystore", "#{KEYS_PATH}/sample-android.p12",
       "-storetype", "pkcs12", "-storepass", "123456",
       "build/teak-air-cleanroom.apk", "src/app.xml", "src/mm.cfg", "-C", "build", "teak-air-cleanroom.swf",
-      "-C", "src/assets", "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
+      "-C", "src/assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
+      "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
 
     config_path = File.join(PROJECT_PATH, 'src', 'air-repack.config')
     File.write(config_path, """
@@ -96,12 +107,13 @@ release.alias = alias_name
     #cp "build/teak-air-cleanroom.apk", "teak-air-cleanroom.apk"
   end
 
-  task :ios do
+  task ios: [:app_xml] do
     adt "-package", "-target", "ipa-debug", "-keystore", "#{KEYS_PATH}/sample-ios.p12",
       "-storetype", "pkcs12", "-storepass", "123456",
       "-provisioning-profile", "#{KEYS_PATH}/sample-ios.mobileprovision",
       "build/teak-air-cleanroom.ipa", "src/app.xml", "src/mm.cfg", "-C", "build", "teak-air-cleanroom.swf",
-      "-C", "src/assets", "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
+      "-C", "src/assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
+      "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
     cp 'build/teak-air-cleanroom.ipa', 'teak-air-cleanroom.ipa'
   end
 end
@@ -117,11 +129,11 @@ namespace :install do
       adb = lambda { |*args| sh "adb -s #{device} #{args.join(' ')}" }
 
       begin
-        adb.call "uninstall com.teakio.pushtest"
+        adb.call "uninstall #{BUNDLE_ID}"
       rescue
       end
       adb.call "install teak-air-cleanroom.apk"
-      adb.call "shell am start -W -a android.intent.action.VIEW -d https://teakangrybots.jckpt.me/ESW-__uzW com.teakio.pushtest"
+      adb.call "shell am start -W -a android.intent.action.VIEW -d https://teakangrybots.jckpt.me/ESW-__uzW #{BUNDLE_ID}"
     end
   end
 end

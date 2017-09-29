@@ -3,14 +3,14 @@
 
     <id>com.teakio.pushtest</id>
     <filename>teak-air-cleanroom</filename>
-    <name>Teak Air Test</name>
+    <name>Teak Air Cleanroom</name>
     <versionNumber>1.0.1</versionNumber>
-    
+
     <initialWindow>
         <content>teak-air-cleanroom.swf</content>
-        <autoOrients>true</autoOrients>
-        <aspectRatio>any</aspectRatio>
-        <renderMode>cpu</renderMode>
+        <autoOrients>false</autoOrients>
+        <aspectRatio>portrait</aspectRatio>
+        <renderMode>direct</renderMode>
         <fullScreen>true</fullScreen>
         <systemChrome>standard</systemChrome>
     </initialWindow>
@@ -20,7 +20,7 @@
         <Entitlements>
             <![CDATA[
                 <key>aps-environment</key>
-                <string>production</string>
+                <string>development</string>
 
                 <key>com.apple.developer.associated-domains</key>
                 <array>
@@ -41,16 +41,18 @@
                 <key>TeakApiKey</key>
                 <string>1f3850f794b9093864a0778009744d03</string>
 
+                <key>UIBackgroundModes</key>
+                <array>
+                    <string>remote-notification</string>
+                </array>
+
                 <key>CFBundleURLTypes</key>
                 <array>
                     <dict>
                         <key>CFBundleURLSchemes</key>
                         <array>
-                            <string>fb1136371193060244</string>
-                        </array>
-                        <key>CFBundleURLSchemes</key>
-                        <array>
                             <string>teak1136371193060244</string>
+                            <string>fb1136371193060244</string>
                         </array>
                     </dict>
                 </array>
@@ -100,7 +102,7 @@
         <manifestAdditions>
             <![CDATA[
             <manifest android:installLocation="auto">
-            <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="25" />
+            <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="21" />
 
             <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -112,17 +114,21 @@
             <uses-permission android:name="com.teakio.pushtest.permission.C2D_MESSAGE"/>
             <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 
+            <!-- android:name="io.teak.sdk.Application"  -->
             <application android:debuggable="true">
+                <meta-data android:name="io_teak_app_id" android:value="teak1136371193060244" />
+                <meta-data android:name="io_teak_api_key" android:value="teak1f3850f794b9093864a0778009744d03" />
+                <meta-data android:name="io_teak_gcm_sender_id" android:value="teak944348058057" />
 
                 <activity
                     android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden|fontScale"
                     android:label="@string/app_name"
                     android:launchMode="singleTask"
                     android:name=".AppEntry"
-                    android:screenOrientation="user"
+                    android:screenOrientation="portrait"
                     android:theme="@style/Theme.NoShadow"
                     android:windowSoftInputMode="adjustResize|stateHidden">
-                    <intent-filter android:autoVerify="true" >
+                    <intent-filter android:autoVerify="true">
                         <action android:name="android.intent.action.VIEW" />
 
                         <category android:name="android.intent.category.DEFAULT" />
@@ -155,9 +161,16 @@
                         <action android:name="com.teakio.pushtest.intent.TEAK_NOTIFICATION_OPENED" />
                         <action android:name="com.teakio.pushtest.intent.TEAK_NOTIFICATION_CLEARED" />
                         <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                        <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
                         <category android:name="com.teakio.pushtest" />
                     </intent-filter>
                 </receiver>
+
+                <service android:name="io.teak.sdk.InstanceIDListenerService" android:exported="false" >
+                    <intent-filter>
+                        <action android:name="com.google.android.gms.iid.InstanceID" />
+                    </intent-filter>
+                </service>
 
                 <meta-data android:name="com.facebook.sdk.ApplicationId" 
                            android:value="fb1136371193060244"/>

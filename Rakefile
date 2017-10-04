@@ -15,6 +15,13 @@ KEYS_PATH = ENV.fetch('TEAK_AIR_CLEANROOM_KEYS', File.join(ENV['HOME'], 'teak-ai
 BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'com.teakio.pushtest')
 
 #
+# Play a sound after finished
+#
+at_exit do
+  sh "afplay /System/Library/Sounds/Submarine.aiff"
+end
+
+#
 # Helper methods
 #
 def amxmlc(*args)

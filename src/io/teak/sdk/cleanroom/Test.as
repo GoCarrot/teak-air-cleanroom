@@ -52,6 +52,11 @@ package io.teak.sdk.cleanroom
 
 		public function OnReward(parameters:Object):Boolean
 		{
+			if(!parameters.teakCreativeName || parameters.teakCreativeName != this.CreativeId)
+			{
+				this.Status = 2;
+			}
+
 			Prepare();
 			onRewardCalled = true;
 			return CheckStatus();
@@ -59,6 +64,15 @@ package io.teak.sdk.cleanroom
 
 		public function OnLaunchedFromNotification(parameters:Object):Boolean
 		{
+			if(!parameters.teakCreativeName || parameters.teakCreativeName != this.CreativeId)
+			{
+				this.Status = 2;
+			}
+			else if(this.VerifyReward && !parameters.incentivized)
+			{
+				this.Status = 2;
+			}
+
 			Prepare();
 			onLaunchCalled = true;
 			return CheckStatus();

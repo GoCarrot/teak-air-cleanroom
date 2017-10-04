@@ -20,14 +20,15 @@ package io.teak.sdk.cleanroom
 	import flash.net.SharedObject;
 
 	// Import the Teak SDK
-	import io.teak.sdk.*
+	import io.teak.sdk.*;
 
+CONFIG::use_air_to_register_notifications {
 	// --- These are the imports needed to request notification permissions ---
 	import flash.notifications.NotificationStyle;
 	import flash.notifications.RemoteNotifier;
 	import flash.notifications.RemoteNotifierSubscribeOptions;
 	// ------------------------------------------------------------------------
-
+}
 	public class Main extends Sprite
 	{
 		public function Main()
@@ -53,16 +54,22 @@ package io.teak.sdk.cleanroom
 			Teak.instance.addEventListener(TeakEvent.NOTIFICATION_SCHEDULED, notificationScheduledHandler);
 			Teak.instance.addEventListener(TeakEvent.NOTIFICATION_CANCELED, notificationCanceledHandler);
 
-			// Configure the permissions for notifications
-			var preferredStyles:Vector.<String> = new Vector.<String>();
-			var subscribeOptions:RemoteNotifierSubscribeOptions = new RemoteNotifierSubscribeOptions();
-			var remoteNot:RemoteNotifier = new RemoteNotifier();
+CONFIG::use_air_to_register_notifications {
+				// Configure the permissions for notifications
+				var preferredStyles:Vector.<String> = new Vector.<String>();
+				var subscribeOptions:RemoteNotifierSubscribeOptions = new RemoteNotifierSubscribeOptions();
+				var remoteNot:RemoteNotifier = new RemoteNotifier();
 
-			preferredStyles.push(NotificationStyle.ALERT, NotificationStyle.BADGE, NotificationStyle.SOUND );
-			subscribeOptions.notificationStyles = preferredStyles;
+				preferredStyles.push(NotificationStyle.ALERT, NotificationStyle.BADGE, NotificationStyle.SOUND );
+				subscribeOptions.notificationStyles = preferredStyles;
 
-			// Request notification permissions on iOS with the popup
-			remoteNot.subscribe(subscribeOptions);
+				// Request notification permissions on iOS with the popup
+				remoteNot.subscribe(subscribeOptions);
+}
+CONFIG::use_teak_to_register_notifications {
+
+				Teak.instance.registerForNotifications();
+}
 		}
 
 		private function rewardHandler(e:TeakEvent):void

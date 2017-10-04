@@ -14,6 +14,8 @@ KEYS_PATH = ENV.fetch('TEAK_AIR_CLEANROOM_KEYS', File.join(ENV['HOME'], 'teak-ai
 
 BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'com.teakio.pushtest')
 
+USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION = true
+
 #
 # Play a sound after finished
 #
@@ -61,6 +63,8 @@ namespace :build do
   task :air do
     #{}"-compiler.library-path=src/extensions/AirFacebook.ane",
     amxmlc "-compiler.library-path=src/extensions/io.teak.sdk.Teak.ane",
+      "-define+=CONFIG::use_air_to_register_notifications,#{USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION}",
+      "-define+=CONFIG::use_teak_to_register_notifications,#{!USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION}",
       "-output", "build/teak-air-cleanroom.swf", "-swf-version=29", "-default-size=320,480",
       "-default-background-color=#b1b1b1", "-debug", "-compiler.include-libraries=src/assets/feathers.swc,src/assets/MetalWorksMobileTheme.swc,src/assets/starling.swc",
       "src/io/teak/sdk/cleanroom/Test.as", "src/io/teak/sdk/cleanroom/Main.as", "src/Cleanroom.as"

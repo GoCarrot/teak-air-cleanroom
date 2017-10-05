@@ -193,6 +193,12 @@
 
     <extensions>
         <extensionID>io.teak.sdk.Teak</extensionID>
+        {{#test_distriqt}}
+        <extensionID>com.distriqt.Core</extensionID>
+        {{/test_distriqt}}
+        {{#test_distriqt_notif}}
+        <extensionID>com.distriqt.PushNotifications</extensionID>
+        {{/test_distriqt_notif}}
         <extensionID>com.vungle.extensions.android.GooglePlayServices</extensionID>
         <extensionID>com.vungle.extensions.android.AndroidSupportLib</extensionID>
         <extensionID>com.freshplanet.ane.AirFacebook</extensionID>

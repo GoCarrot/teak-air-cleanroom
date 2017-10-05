@@ -16,6 +16,9 @@ BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'com.teakio.pushtest')
 
 USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION = true
 
+TEST_DISTRIQT = ENV.fetch('TEST_DISTRIQT', false)
+TEST_DISTRIQT_NOTIF = ENV.fetch('TEST_DISTRIQT_NOTIF', false)
+
 #
 # Play a sound after finished
 #
@@ -61,8 +64,16 @@ end
 
 namespace :build do
   task :air do
-    #{}"-compiler.library-path=src/extensions/AirFacebook.ane",
-    amxmlc "-compiler.library-path=src/extensions/io.teak.sdk.Teak.ane",
+    distriqt_lines = ["-define+=CONFIG::test_distriqt,#{TEST_DISTRIQT}", "-define+=CONFIG::test_distriqt_notif,#{TEST_DISTRIQT_NOTIF}"]
+    if TEST_DISTRIQT then
+      distriqt_lines << "-compiler.library-path=src/extensions/com.distriqt.Core.ane"
+    end
+    if TEST_DISTRIQT_NOTIF then
+      distriqt_lines << "-compiler.library-path=src/extensions/com.distriqt.PushNotifications.ane"
+    end
+
+    amxmlc *distriqt_lines, "-compiler.library-path=src/extensions/io.teak.sdk.Teak.ane",
+      "-compiler.library-path=src/extensions/AirFacebook.ane",
       "-define+=CONFIG::use_air_to_register_notifications,#{USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION}",
       "-define+=CONFIG::use_teak_to_register_notifications,#{!USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION}",
       "-output", "build/teak-air-cleanroom.swf", "-swf-version=29", "-default-size=320,480",
@@ -73,7 +84,7 @@ namespace :build do
   task :app_xml do
     template = File.read(File.join(PROJECT_PATH, 'src', 'app.xml.template'))
     File.write(File.join(PROJECT_PATH, 'src', 'app.xml'), Mustache.render(template, {
-      bundle_id: BUNDLE_ID
+      bundle_id: BUNDLE_ID, test_distriqt: TEST_DISTRIQT, test_distriqt_notif: TEST_DISTRIQT_NOTIF
     }))
   end
 

@@ -19,6 +19,13 @@ package io.teak.sdk.cleanroom
 
 	import flash.net.SharedObject;
 
+CONFIG::test_distriqt {
+	import com.distriqt.extension.core.Core;
+}
+CONFIG::test_distriqt_notif {
+	import com.distriqt.extension.pushnotifications.*;
+}
+
 	// Import the Teak SDK
 	import io.teak.sdk.*;
 
@@ -33,6 +40,17 @@ CONFIG::use_air_to_register_notifications {
 	{
 		public function Main()
 		{
+			// The problem-libraries
+CONFIG::test_distriqt {
+			Core.init();
+}
+CONFIG::test_distriqt_notif {
+			PushNotifications.init("0765b48cf45ae3a2840bd49201038f50d49c27e0Ry5lvYs1S6dG6ANouiEPMK9Ts0GmJ02HJY32LZjxI39yrOWCPcrqO5RG8kZLxxxK1J2O26RSuMIRp4DmXYWeFokTjuc/zUmjp3JNQiKiqlMu3TBltjwY0CZa+jpeCjir1r2L4TcKKMnuO4sVwDOJ0GjvfPmVpnglxphqoRWP42/MgE0rwGIrP4NEa9QG92PBBK2pAne7YHfQ8XMdH/9gTryj53naH6SuX9LW+mx522XfI3IaHM/0Dc1BRHs2FYr6rpsxNCSYXZQdJZVf7HRLT7IysyoceZWVsen3XlLewro7B3f8KvCESrTZu44s5EcocTyb2d6QrbYFv0PbW+Feag==");
+			var service:Service = new Service(Service.DEFAULT);
+			service.sandboxMode = true;
+			PushNotifications.service.setup(service);
+}
+
 			// Set up the UI when this Sprite is added to the stage
 			this.addEventListener(Event.ADDED_TO_STAGE, addedToStageHandler);
 

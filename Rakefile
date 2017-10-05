@@ -142,7 +142,11 @@ end
 
 namespace :install do
   task :ios do
-    sh "ideviceinstaller -i teak-air-cleanroom.ipa"
+    begin
+      sh "ideviceinstaller --uninstall #{BUNDLE_ID}"
+    rescue
+    end
+    sh "ideviceinstaller --install teak-air-cleanroom.ipa"
   end
 
   task :android do

@@ -92,7 +92,7 @@ CONFIG::use_teak_to_register_notifications {
 
 		private function rewardHandler(e:TeakEvent):void
 		{
-			TextCallout.show("Reward:\n" + JSON.stringify(e.data), currentTestButton);
+			TextCallout.show("Reward:\n" + e.data, currentTestButton);
 
 			switch (e.data['status'] as String) {
 				case "grant_reward": {
@@ -130,7 +130,7 @@ CONFIG::use_teak_to_register_notifications {
 				}
 				break;
 
-				if(currentTestIndex > -1 && tests[currentTestIndex].OnReward(e.data))
+				if(currentTestIndex > -1 && tests[currentTestIndex].OnReward(JSON.parse(e.data)))
 				{
 					advanceTests();
 				}
@@ -139,7 +139,8 @@ CONFIG::use_teak_to_register_notifications {
 
 		private function launchedFromNotificationHandler(e:TeakEvent):void
 		{
-			if(currentTestIndex > -1 && tests[currentTestIndex].OnLaunchedFromNotification(e.data))
+			TextCallout.show("launchedFromNotificationHandler: " + e.data, currentTestButton);
+			if(currentTestIndex > -1 && tests[currentTestIndex].OnLaunchedFromNotification(JSON.parse(e.data)))
 			{
 				advanceTests();
 			}
@@ -147,7 +148,7 @@ CONFIG::use_teak_to_register_notifications {
 
 		private function notificationScheduledHandler(e:TeakEvent):void
 		{
-			TextCallout.show("Notification Scheduled:\n" + JSON.stringify(e.data), currentTestButton);
+			TextCallout.show("Notification Scheduled:\n" + e.data, currentTestButton);
 
 			if(tests[currentTestIndex].AutoBackground)
 			{
@@ -157,7 +158,7 @@ CONFIG::use_teak_to_register_notifications {
 
 		private function notificationCanceledHandler(e:TeakEvent):void
 		{
-			TextCallout.show("Notification Canceled:\n" + JSON.stringify(e.data), currentTestButton);
+			TextCallout.show("Notification Canceled:\n" + e.data, currentTestButton);
 		}
 
 		private function teakIdentifyUser():void

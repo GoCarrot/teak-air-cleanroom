@@ -71,6 +71,7 @@ CONFIG::test_distriqt_notif {
 			Teak.instance.addEventListener(TeakEvent.ON_REWARD, rewardHandler);
 			Teak.instance.addEventListener(TeakEvent.NOTIFICATION_SCHEDULED, notificationScheduledHandler);
 			Teak.instance.addEventListener(TeakEvent.NOTIFICATION_CANCELED, notificationCanceledHandler);
+			Teak.instance.addEventListener(TeakEvent.NOTIFICATION_CANCEL_ALL, notificationCancelAllHandler);
 
 CONFIG::use_air_to_register_notifications {
 				// Configure the permissions for notifications
@@ -148,7 +149,7 @@ CONFIG::use_teak_to_register_notifications {
 
 		private function notificationScheduledHandler(e:TeakEvent):void
 		{
-			TextCallout.show("Notification Scheduled:\n" + e.data, currentTestButton);
+			TextCallout.show("Notification Scheduled (" + e.status + "):\n" + e.data, currentTestButton);
 
 			if(tests[currentTestIndex].AutoBackground)
 			{
@@ -158,7 +159,12 @@ CONFIG::use_teak_to_register_notifications {
 
 		private function notificationCanceledHandler(e:TeakEvent):void
 		{
-			TextCallout.show("Notification Canceled:\n" + e.data, currentTestButton);
+			TextCallout.show("Notification Canceled (" + e.status + "):\n" + e.data, currentTestButton);
+		}
+
+		private function notificationCancelAllHandler(e:TeakEvent):void
+		{
+			TextCallout.show("All Notifications Canceled (" + e.status + "):\n" + e.data, currentTestButton);
 		}
 
 		private function teakIdentifyUser():void
@@ -221,6 +227,17 @@ CONFIG::use_teak_to_register_notifications {
 			container.addChild(label);
 
 			advanceTests();
+
+			var cancelAllButton:Button = new Button();
+			cancelAllButton.label = "Cancel All Notifications"
+			cancelAllButton.height = 50;
+			cancelAllButton.layoutData = layoutData;
+			cancelAllButton.addEventListener(Event.TRIGGERED, function(event:Event):void {
+				Teak.instance.cancelAllNotifications();
+			});
+
+			container.addChild(cancelAllButton);
+			cancelAllButton.validate();
 		}
 
 		protected function advanceTests():void

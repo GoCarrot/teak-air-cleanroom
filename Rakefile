@@ -130,7 +130,8 @@ release.alias = alias_name
   end
 
   task ios: [:app_xml] do
-    adt "-package", "-target", "ipa-debug", "-keystore", "#{KEYS_PATH}/sample-ios.p12",
+    adt "-package", "-target", "ipa-debug", #"-embedBitcode", "yes",
+      "-keystore", "#{KEYS_PATH}/sample-ios.p12",
       "-storetype", "pkcs12", "-storepass", "123456",
       "-provisioning-profile", "#{KEYS_PATH}/sample-ios.mobileprovision",
       "build/teak-air-cleanroom.ipa", "src/app.xml", "src/mm.cfg", "-C", "build", "teak-air-cleanroom.swf",

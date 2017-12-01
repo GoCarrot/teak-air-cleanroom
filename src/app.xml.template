@@ -171,6 +171,8 @@
                     </intent-filter>
                 </receiver>
 
+                <service android:name="io.teak.sdk.service.RavenService" android:process=":teak.raven" android:exported="false"/>
+
                 <service android:name="io.teak.sdk.InstanceIDListenerService" android:exported="false" >
                     <intent-filter>
                         <action android:name="com.google.android.gms.iid.InstanceID" />

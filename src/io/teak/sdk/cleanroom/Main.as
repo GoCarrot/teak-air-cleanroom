@@ -94,8 +94,9 @@ CONFIG::use_teak_to_register_notifications {
 		private function rewardHandler(e:TeakEvent):void
 		{
 			TextCallout.show("Reward:\n" + e.data, currentTestButton);
+			var payload:Object = JSON.parse(e.data);
 
-			switch (e.data['status'] as String) {
+			switch (payload.status as String) {
 				case "grant_reward": {
 					// The user has been issued this reward by Teak
 				}
@@ -130,11 +131,11 @@ CONFIG::use_teak_to_register_notifications {
 					//Teak does not recognize this reward id
 				}
 				break;
+			}
 
-				if(currentTestIndex > -1 && tests[currentTestIndex].OnReward(JSON.parse(e.data)))
-				{
-					advanceTests();
-				}
+			if(currentTestIndex > -1 && tests[currentTestIndex].OnReward(payload))
+			{
+				advanceTests();
 			}
 		}
 
@@ -173,13 +174,13 @@ CONFIG::use_teak_to_register_notifications {
 			var so:SharedObject = SharedObject.getLocal("teakExampleApp");
 			if (!so.data.hasOwnProperty('userId')) {
 				var chars:String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  				var num_chars:Number = chars.length - 1;
-  				var uid:String = "";
- 
-  				for (var i:Number = 0; i < 10; i++) {
-  					uid += chars.charAt(Math.floor(Math.random() * num_chars));
-  				}
-  
+				var num_chars:Number = chars.length - 1;
+				var uid:String = "";
+
+				for (var i:Number = 0; i < 10; i++) {
+					uid += chars.charAt(Math.floor(Math.random() * num_chars));
+				}
+
 				so.data['userId'] = uid;
 				so.flush();
 			}
@@ -294,8 +295,8 @@ CONFIG::use_teak_to_register_notifications {
 		protected var tests:Array = [
 			new Test("Simple Notification", "test_none"),
 			new Test("Deep Link", "test_deeplink", "link-only"),
-			new Test("Reward", "test_reward"),
-			new Test("Reward + Deep Link", "test_rewarddeeplink", "with-reward")
+			new Test("Reward", "test_reward", null, {"coins": 1000}),
+			new Test("Reward + Deep Link", "test_rewarddeeplink", "with-reward", {"coins": 1000})
 		];
 	}
 }

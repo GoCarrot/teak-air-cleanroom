@@ -7,7 +7,7 @@ package io.teak.sdk.cleanroom
 		private var onLaunchCalled:Boolean = false;
 
 		public var Status:int = 0;
-		public var VerifyReward:String = null;
+		public var VerifyReward:Object = null;
 		public var VerifyDeepLink:String = null;
 
 		public var AutoBackground:Boolean = true;
@@ -15,11 +15,12 @@ package io.teak.sdk.cleanroom
 		public var Name:String;
 		public var CreativeId:String;
 
-		public function Test(name:String, creativeId:String, verifyDeepLink:String = null)
+		public function Test(name:String, creativeId:String, verifyDeepLink:String = null, verifyReward:Object = null)
 		{
 			this.Name = name;
 			this.CreativeId = creativeId;
 			this.VerifyDeepLink = verifyDeepLink;
+			this.VerifyReward = verifyReward
 		}
 
 		protected function Prepare():void
@@ -40,25 +41,29 @@ package io.teak.sdk.cleanroom
 
 		public function OnDeepLink(parameters:Object):Boolean
 		{
-			if(this.VerifyDeepLink && parameters.data != this.VerifyDeepLink)
+			if(this.VerifyDeepLink && parameters.data !== this.VerifyDeepLink)
 			{
 				this.Status = 2;
 			}
 
 			Prepare();
-			onDeepLinkCalled = true;
+			this.onDeepLinkCalled = true;
 			return CheckStatus();
 		}
 
 		public function OnReward(parameters:Object):Boolean
 		{
-			if(!parameters.teakCreativeName || parameters.teakCreativeName != this.CreativeId)
+			if(!parameters.teakCreativeName || parameters.teakCreativeName !== this.CreativeId)
+			{
+				this.Status = 2;
+			}
+			else if (this.VerifyReward && JSON.stringify(this.VerifyReward) !== JSON.stringify(parameters.reward))
 			{
 				this.Status = 2;
 			}
 
 			Prepare();
-			onRewardCalled = true;
+			this.onRewardCalled = true;
 			return CheckStatus();
 		}
 
@@ -74,7 +79,7 @@ package io.teak.sdk.cleanroom
 			}
 
 			Prepare();
-			onLaunchCalled = true;
+			this.onLaunchCalled = true;
 			return CheckStatus();
 		}
 	}

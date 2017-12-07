@@ -172,7 +172,7 @@ CONFIG::use_teak_to_register_notifications {
 		{
 			// Get or create a unique user id
 			var so:SharedObject = SharedObject.getLocal("teakExampleApp");
-			if (!so.data.hasOwnProperty('userId')) {
+			if (!so.data.hasOwnProperty('userId') || so.data['userId'] === null) {
 				var chars:String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 				var num_chars:Number = chars.length - 1;
 				var uid:String = "";
@@ -239,6 +239,20 @@ CONFIG::use_teak_to_register_notifications {
 
 			container.addChild(cancelAllButton);
 			cancelAllButton.validate();
+
+			var changeUserIdTest:Button = new Button();
+			changeUserIdTest.label = "Change User Id"
+			changeUserIdTest.height = 50;
+			changeUserIdTest.layoutData = layoutData;
+			changeUserIdTest.addEventListener(Event.TRIGGERED, function(event:Event):void {
+				var so:SharedObject = SharedObject.getLocal("teakExampleApp");
+				so.data['userId'] = null;
+				so.flush();
+				teakIdentifyUser();
+			});
+
+			container.addChild(changeUserIdTest);
+			changeUserIdTest.validate();
 		}
 
 		protected function advanceTests():void

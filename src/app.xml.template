@@ -201,8 +201,9 @@
         {{#test_distriqt_notif}}
         <extensionID>com.distriqt.PushNotifications</extensionID>
         {{/test_distriqt_notif}}
-        <extensionID>com.vungle.extensions.android.GooglePlayServices</extensionID>
-        <extensionID>com.vungle.extensions.android.AndroidSupportLib</extensionID>
-        <extensionID>com.freshplanet.ane.AirFacebook</extensionID>
+        <extensionID>com.distriqt.playservices.Base</extensionID>
+        <extensionID>com.distriqt.playservices.GCM</extensionID>
+        <extensionID>com.distriqt.androidsupport.V4</extensionID>
+        <!--<extensionID>com.freshplanet.ane.AirFacebook</extensionID>-->
     </extensions>
 </application>

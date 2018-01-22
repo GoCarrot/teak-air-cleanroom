@@ -53,6 +53,10 @@ package io.teak.sdk.cleanroom
 
 		public function OnReward(parameters:Object):Boolean
 		{
+			if(!parameters.teakRewardId || parameters.teakRewardId === "") {
+				this.Status = 2;
+			}
+
 			if(!parameters.teakCreativeName || parameters.teakCreativeName !== this.CreativeId)
 			{
 				this.Status = 2;

@@ -265,6 +265,9 @@ CONFIG::use_teak_to_register_notifications {
 
 				var label:Label = new Label();
 				label.text = emoji + " " + tests[currentTestIndex].Name;
+				if (tests[currentTestIndex].Status == 2) {
+					label.text += "\n\t" + tests[currentTestIndex].Error;
+				}
 				label.layoutData = layoutData;
 				label.wordWrap = true;
 				label.textRendererFactory = function():ITextRenderer

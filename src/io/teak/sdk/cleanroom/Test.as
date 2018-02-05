@@ -7,6 +7,7 @@ package io.teak.sdk.cleanroom
 		private var onLaunchCalled:Boolean = false;
 
 		public var Status:int = 0;
+		public var Error:String = null;
 		public var VerifyReward:Object = null;
 		public var VerifyDeepLink:String = null;
 

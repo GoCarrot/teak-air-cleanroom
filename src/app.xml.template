@@ -152,9 +152,7 @@
                         <category android:name="android.intent.category.DEFAULT" />
                         <category android:name="android.intent.category.BROWSABLE" />
 
-                        <data
-                            android:host="*"
-                            android:scheme="teak1136371193060244" />
+                        <data android:scheme="teak1136371193060244" android:host="*" />
                     </intent-filter>
                 </activity>
 
@@ -172,6 +170,8 @@
                 </receiver>
 
                 <service android:name="io.teak.sdk.service.RavenService" android:process=":teak.raven" android:exported="false"/>
+
+                <service android:name="io.teak.sdk.service.DeviceStateService" android:process=":teak.device_state" android:exported="false"/>
 
                 <service android:name="io.teak.sdk.InstanceIDListenerService" android:exported="false" >
                     <intent-filter>

@@ -125,14 +125,11 @@
                 <meta-data android:name="io_teak_api_key" android:value="teak1f3850f794b9093864a0778009744d03" />
                 <meta-data android:name="io_teak_gcm_sender_id" android:value="teak944348058057" />
 
-                <activity
-                    android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden|fontScale"
-                    android:label="@string/app_name"
-                    android:launchMode="singleTask"
-                    android:name=".AppEntry"
-                    android:screenOrientation="portrait"
-                    android:theme="@style/Theme.NoShadow"
-                    android:windowSoftInputMode="adjustResize|stateHidden">
+                <activity>
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>
                     <intent-filter android:autoVerify="true">
                         <action android:name="android.intent.action.VIEW" />
 

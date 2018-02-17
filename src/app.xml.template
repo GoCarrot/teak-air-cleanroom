@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<application xmlns="http://ns.adobe.com/air/application/22.0">
+<application xmlns="http://ns.adobe.com/air/application/24.0">
 
     <id>{{bundle_id}}</id>
     <filename>teak-air-cleanroom</filename>
@@ -107,7 +107,7 @@
         <manifestAdditions>
             <![CDATA[
             <manifest android:installLocation="auto">
-            <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="21" />
+            <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="26" />
 
             <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

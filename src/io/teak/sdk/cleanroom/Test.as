@@ -44,6 +44,7 @@ package io.teak.sdk.cleanroom
 		{
 			if(this.VerifyDeepLink && parameters.data !== this.VerifyDeepLink)
 			{
+				this.Error = "Deep Link: should be '" + this.VerifyDeepLink + "' found: '" + parameters.data + "'";
 				this.Status = 2;
 			}
 
@@ -55,15 +56,18 @@ package io.teak.sdk.cleanroom
 		public function OnReward(parameters:Object):Boolean
 		{
 			if(!parameters.teakRewardId || parameters.teakRewardId === "") {
+				this.Error = "Reward: teakRewardId is null or empty";
 				this.Status = 2;
 			}
 
 			if(!parameters.teakCreativeName || parameters.teakCreativeName !== this.CreativeId)
 			{
+				this.Error = "Reward: teakCreativeName mismatch, should be '" + this.CreativeId + "' found: '" + parameters.teakCreativeName + "'";
 				this.Status = 2;
 			}
 			else if (this.VerifyReward && JSON.stringify(this.VerifyReward) !== JSON.stringify(parameters.reward))
 			{
+				this.Error = "Reward: reward mismatch, should be '" + JSON.stringify(this.VerifyReward) + "' found: '" + JSON.stringify(parameters.reward) + "'";
 				this.Status = 2;
 			}
 
@@ -76,10 +80,12 @@ package io.teak.sdk.cleanroom
 		{
 			if(!parameters.teakCreativeName || parameters.teakCreativeName != this.CreativeId)
 			{
+				this.Error = "Notification Launch: teakCreativeName mismatch, should be '" + this.CreativeId + "' found: '" + parameters.teakCreativeName + "'";
 				this.Status = 2;
 			}
 			else if(this.VerifyReward && !parameters.incentivized)
 			{
+				this.Error = "Notification Launch: 'incentivized' was false, should have been true";
 				this.Status = 2;
 			}
 

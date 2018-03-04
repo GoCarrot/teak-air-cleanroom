@@ -93,6 +93,7 @@ CONFIG::use_teak_to_register_notifications {
 
 		private function rewardHandler(e:TeakEvent):void
 		{
+			Teak.instance.log("Reward:\n" + e.data);
 			TextCallout.show("Reward:\n" + e.data, currentTestButton);
 			var payload:Object = JSON.parse(e.data);
 
@@ -141,6 +142,7 @@ CONFIG::use_teak_to_register_notifications {
 
 		private function launchedFromNotificationHandler(e:TeakEvent):void
 		{
+			Teak.instance.log("launchedFromNotificationHandler: " + e.data);
 			TextCallout.show("launchedFromNotificationHandler: " + e.data, currentTestButton);
 			if(currentTestIndex > -1 && tests[currentTestIndex].OnLaunchedFromNotification(JSON.parse(e.data)))
 			{

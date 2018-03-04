@@ -161,7 +161,7 @@ namespace :install do
       rescue
       end
       adb.call "install teak-air-cleanroom.apk"
-      adb.call "shell am start -W -a android.intent.action.VIEW -d https://teakangrybots.jckpt.me/ESW-__uzW #{BUNDLE_ID}"
+      adb.call "shell am start -n #{BUNDLE_ID}/#{BUNDLE_ID}.AppEntry"
     end
   end
 end

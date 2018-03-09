@@ -18,6 +18,8 @@ package io.teak.sdk.cleanroom
 	import starling.events.Event;
 
 	import flash.net.SharedObject;
+	import flash.net.navigateToURL;
+	import flash.net.URLRequest;
 
 CONFIG::test_distriqt {
 	import com.distriqt.extension.core.Core;
@@ -156,7 +158,8 @@ CONFIG::use_teak_to_register_notifications {
 
 			if(tests[currentTestIndex].AutoBackground)
 			{
-				// TODO: ANE for this
+				var request:URLRequest = new URLRequest("https://google.com");
+				navigateToURL(request);
 			}
 		}
 

@@ -148,6 +148,7 @@ namespace :install do
       sh "ideviceinstaller --uninstall #{BUNDLE_ID}"
     rescue
     end
+    # https://github.com/libimobiledevice/libimobiledevice/issues/510#issuecomment-347175312
     sh "ideviceinstaller --install teak-air-cleanroom.ipa"
   end
 
@@ -158,6 +159,14 @@ namespace :install do
 
       begin
         adb.call "uninstall #{BUNDLE_ID}"
+      rescue
+      end
+      begin
+        adb.call "uninstall io.teak.sdk.sd"
+      rescue
+      end
+      begin
+        adb.call "uninstall com.teakio.pushtest"
       rescue
       end
       adb.call "install teak-air-cleanroom.apk"

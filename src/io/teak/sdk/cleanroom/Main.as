@@ -173,20 +173,24 @@ CONFIG::use_teak_to_register_notifications {
 			TextCallout.show("All Notifications Canceled (" + e.status + "):\n" + e.data, currentTestButton);
 		}
 
+		private function randomNonConfusingString(length:int):String
+		{
+			var chars:String = "abcdefghkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
+			var num_chars:Number = chars.length - 1;
+			var uid:String = "";
+
+			for (var i:Number = 0; i < length; i++) {
+				uid += chars.charAt(Math.floor(Math.random() * num_chars));
+			}
+			return uid;
+		}
+
 		private function teakIdentifyUser():void
 		{
 			// Get or create a unique user id
 			var so:SharedObject = SharedObject.getLocal("teakExampleApp");
 			if (!so.data.hasOwnProperty('userId') || so.data['userId'] === null) {
-				var chars:String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-				var num_chars:Number = chars.length - 1;
-				var uid:String = "";
-
-				for (var i:Number = 0; i < 10; i++) {
-					uid += chars.charAt(Math.floor(Math.random() * num_chars));
-				}
-
-				so.data['userId'] = uid;
+				so.data['userId'] = randomNonConfusingString(10);
 				so.flush();
 			}
 			Teak.instance.identifyUser(so.data['userId']);

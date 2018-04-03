@@ -56,6 +56,9 @@ CONFIG::test_distriqt_notif {
 			// Set up the UI when this Sprite is added to the stage
 			this.addEventListener(Event.ADDED_TO_STAGE, addedToStageHandler);
 
+			// For checking status of notifications
+			this.addEventListener(Event.ENTER_FRAME, enterFrameHandler);
+
 			// Register a deep link route
 			var scope:Main = this;
 			Teak.instance.registerRoute("/test/:data", "Test", "Deep link for semi-automated tests", function(parameters:Object):void {
@@ -197,6 +200,7 @@ CONFIG::use_teak_to_register_notifications {
 		}
 
 		protected var currentTestButton:Button;
+		protected var openSettingsButton:Button;
 		protected var container:LayoutGroup;
 		protected var layoutData:VerticalLayoutData;
 
@@ -208,6 +212,14 @@ CONFIG::use_teak_to_register_notifications {
 			new MetalWorksMobileTheme();
 
 			setupTestUI();
+		}
+
+		protected function enterFrameHandler():void
+		{
+			if (openSettingsButton) {
+				openSettingsButton.isEnabled = !Teak.instance.areNotificationsEnabled();
+				openSettingsButton.validate();
+			}
 		}
 
 		protected function setupTestUI():void
@@ -262,6 +274,30 @@ CONFIG::use_teak_to_register_notifications {
 
 			container.addChild(changeUserIdTest);
 			changeUserIdTest.validate();
+
+			var userProfileTest:Button = new Button();
+			userProfileTest.label = "Test User Profile"
+			userProfileTest.height = 50;
+			userProfileTest.layoutData = layoutData;
+			userProfileTest.addEventListener(Event.TRIGGERED, function(event:Event):void {
+				Teak.instance.setNumericAttribute("coins", Math.random() * 1000000.0);
+				Teak.instance.setStringAttribute("last_slot", randomNonConfusingString(10));
+			});
+
+			container.addChild(userProfileTest);
+			userProfileTest.validate();
+
+			openSettingsButton = new Button();
+			openSettingsButton.label = "Open Settings"
+			openSettingsButton.height = 50;
+			openSettingsButton.layoutData = layoutData;
+			openSettingsButton.isEnabled = !Teak.instance.areNotificationsEnabled();
+			openSettingsButton.addEventListener(Event.TRIGGERED, function(event:Event):void {
+				Teak.instance.openSettingsAppToThisAppsSettings();
+			});
+
+			container.addChild(openSettingsButton);
+			openSettingsButton.validate();
 		}
 
 		protected function advanceTests():void

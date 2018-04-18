@@ -190,13 +190,9 @@ CONFIG::use_teak_to_register_notifications {
 
 		private function teakIdentifyUser():void
 		{
-			// Get or create a unique user id
-			var so:SharedObject = SharedObject.getLocal("teakExampleApp");
-			if (!so.data.hasOwnProperty('userId') || so.data['userId'] === null) {
-				so.data['userId'] = randomNonConfusingString(10);
-				so.flush();
-			}
-			Teak.instance.identifyUser(so.data['userId']);
+			var deviceConfiguration:Object = Teak.instance.getDeviceConfiguration();
+			var deviceModel:String = deviceConfiguration.deviceModel;
+			Teak.instance.identifyUser("air-" + deviceModel.toLowerCase());
 		}
 
 		protected var currentTestButton:Button;

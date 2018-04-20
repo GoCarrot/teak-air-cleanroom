@@ -257,20 +257,6 @@ CONFIG::use_teak_to_register_notifications {
 			container.addChild(cancelAllButton);
 			cancelAllButton.validate();
 
-			var changeUserIdTest:Button = new Button();
-			changeUserIdTest.label = "Change User Id"
-			changeUserIdTest.height = 50;
-			changeUserIdTest.layoutData = layoutData;
-			changeUserIdTest.addEventListener(Event.TRIGGERED, function(event:Event):void {
-				var so:SharedObject = SharedObject.getLocal("teakExampleApp");
-				so.data['userId'] = null;
-				so.flush();
-				teakIdentifyUser();
-			});
-
-			container.addChild(changeUserIdTest);
-			changeUserIdTest.validate();
-
 			var userProfileTest:Button = new Button();
 			userProfileTest.label = "Test User Profile"
 			userProfileTest.height = 50;

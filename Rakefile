@@ -19,6 +19,8 @@ USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION = true
 TEST_DISTRIQT = ENV.fetch('TEST_DISTRIQT', false)
 TEST_DISTRIQT_NOTIF = ENV.fetch('TEST_DISTRIQT_NOTIF', false)
 
+TEAK_SDK_VERSION = ENV.fetch('TEAK_SDK_VERSION', nil) ? "-#{ENV.fetch('TEAK_SDK_VERSION')}" : ""
+
 #
 # Play a sound after finished
 #
@@ -54,7 +56,7 @@ end
 
 namespace :package do
   task download: [:clean] do
-    sh "curl -o src/extensions/io.teak.sdk.Teak.ane https://s3.amazonaws.com/teak-build-artifacts/air/io.teak.sdk.Teak.ane"
+    sh "curl -o src/extensions/io.teak.sdk.Teak.ane https://s3.amazonaws.com/teak-build-artifacts/air/io.teak.sdk.Teak#{TEAK_SDK_VERSION}.ane"
   end
 
   task copy: [:clean] do

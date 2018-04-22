@@ -9,3 +9,6 @@ teak-air-cleanroom.ipa
 teak-air-cleanroom.apk
 
 src/extensions/io.teak.sdk.Teak.ane
+
+fastlane/README.md
+fastlane/report.xml

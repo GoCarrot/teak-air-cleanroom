@@ -9,11 +9,13 @@
 # Uncomment the line if you want fastlane to automatically update itself
 # update_fastlane
 TEAK_APP_EXTENSIONS = ["TeakNotificationService", "TeakNotificationContent"]
-CONFIG_TYPE = "development"
 
 #
 # Configuration
 #
+CONFIG_TYPE = ENV.fetch('CONFIG_TYPE', 'development')
+TEAK_AIR_CLEANROOM_BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'io.teak.app.air.dev')
+
 USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION = true
 TEST_DISTRIQT = ENV.fetch('TEST_DISTRIQT', false)
 TEST_DISTRIQT_NOTIF = ENV.fetch('TEST_DISTRIQT_NOTIF', false)
@@ -48,7 +50,7 @@ end
 
 platform :ios do
   lane :build do
-    Helper::TeakHelper.with_credentials_for("io.teak.app.air.dev") do |p12_file, p12_password, mobileprovision|
+    Helper::TeakHelper.with_credentials_for(TEAK_AIR_CLEANROOM_BUNDLE_ID) do |p12_file, p12_password, mobileprovision|
       Dir.chdir('..') do
         adt "-package", "-target", "ipa-debug", #"-embedBitcode", "yes",
           "-keystore", p12_file, "-storetype", "pkcs12", "-storepass", p12_password,

@@ -10,7 +10,7 @@ ADOBE_AIR_HOME = ENV.fetch('ADOBE_AIR_HOME', '/usr/local/share/adobe-air-sdk')
 
 PROJECT_PATH = Rake.application.original_dir
 
-BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'io.teak.app.air.dev')
+TEAK_AIR_CLEANROOM_BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'io.teak.app.air.dev')
 
 REPACK = ENV.fetch('REPACK', false)
 
@@ -34,6 +34,15 @@ def amxmlc(*args)
   sh "#{ADOBE_AIR_HOME}/bin/amxmlc #{escaped_args}"
 end
 
+def fastlane(*args, env:{})
+  env = {
+    TEAK_AIR_CLEANROOM_BUNDLE_ID: TEAK_AIR_CLEANROOM_BUNDLE_ID,
+    ADOBE_AIR_HOME: ADOBE_AIR_HOME
+  }.merge(env)
+  escaped_args = args.map { |arg| Shellwords.escape(arg) }.join(' ')
+  sh "#{env.map{|k,v| "#{k}='#{v}'"}.join(' ')} bundle exec fastlane #{escaped_args}"
+end
+
 #
 # Tasks
 #
@@ -44,11 +53,11 @@ end
 
 namespace :package do
   task download: [:clean] do
-    sh "bundle exec fastlane sdk"
+    fastlane "sdk"
   end
 
   task copy: [:clean] do
-    sh "FL_TEAK_SDK_SOURCE='../teak-air/' bundle exec fastlane sdk"
+    fastlane "sdk", env: {FL_TEAK_SDK_SOURCE: '../teak-air/'}
   end
 end
 
@@ -74,7 +83,7 @@ namespace :build do
   task :app_xml do
     template = File.read(File.join(PROJECT_PATH, 'src', 'app.xml.template'))
     File.write(File.join(PROJECT_PATH, 'src', 'app.xml'), Mustache.render(template, {
-      bundle_id: BUNDLE_ID,
+      bundle_id: TEAK_AIR_CLEANROOM_BUNDLE_ID,
       test_distriqt: TEST_DISTRIQT,
       test_distriqt_notif: TEST_DISTRIQT_NOTIF,
       application: REPACK ? '' : 'android:name="io.teak.sdk.wrapper.air.Application"'
@@ -82,7 +91,7 @@ namespace :build do
   end
 
   task android: [:app_xml] do
-    sh "bundle exec fastlane android build"
+    fastlane "android", "build"
 
     # Test unpack/repack APK method of integration
     if REPACK
@@ -124,14 +133,14 @@ release.alias = alias_name
   end
 
   task ios: [:app_xml] do
-    sh "bundle exec fastlane ios build"
+    fastlane "ios", "build"
   end
 end
 
 namespace :install do
   task :ios do
     begin
-      sh "ideviceinstaller --uninstall #{BUNDLE_ID}"
+      sh "ideviceinstaller --uninstall #{TEAK_AIR_CLEANROOM_BUNDLE_ID}"
     rescue
     end
     # https://github.com/libimobiledevice/libimobiledevice/issues/510#issuecomment-347175312
@@ -144,11 +153,11 @@ namespace :install do
       adb = lambda { |*args| sh "adb -s #{device} #{args.join(' ')}" }
 
       begin
-        adb.call "uninstall #{BUNDLE_ID}"
+        adb.call "uninstall #{TEAK_AIR_CLEANROOM_BUNDLE_ID}"
       rescue
       end
       adb.call "install teak-air-cleanroom.apk"
-      adb.call "shell am start -n #{BUNDLE_ID}/#{BUNDLE_ID}.AppEntry"
+      adb.call "shell am start -n #{TEAK_AIR_CLEANROOM_BUNDLE_ID}/#{TEAK_AIR_CLEANROOM_BUNDLE_ID}.AppEntry"
     end
   end
 end

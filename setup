@@ -1,0 +1,11 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+if [ "$(which ant)" == "" ]; then brew install ant; fi
+if [ "$(which aws)" == "" ]; then brew install awscli; fi
+if [ "$(which compc)" == "" ]; then
+  brew tap caskroom/cask
+  brew update
+  brew cask install adobe-air-sdk
+fi

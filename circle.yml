@@ -1,0 +1,23 @@
+machine:
+  xcode:
+    version: 9.2
+  environment:
+    ADOBE_AIR_HOME: /usr/local/share/adobe-air-sdk
+test:
+  override:
+  - rake package:download build:air build:android build:ios
+dependencies:
+  pre:
+  - gem install bundler
+  - bundle install
+  - ./setup
+  cache_directories:
+    - ~/Library/Caches/Homebrew/
+checkout:
+  post:
+    - git fetch --tags
+# deployment:
+#   prod:
+#     branch: master
+#     commands:
+#       - aws s3 cp teak-air-cleanroom.ipa s3://teak-build-artifacts/air-cleanroom/teak-air-cleanroom.ipa --acl public-read

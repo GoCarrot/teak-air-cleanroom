@@ -10,16 +10,14 @@ ADOBE_AIR_HOME = ENV.fetch('ADOBE_AIR_HOME', '/usr/local/share/adobe-air-sdk')
 
 PROJECT_PATH = Rake.application.original_dir
 
-KEYS_PATH = ENV.fetch('TEAK_AIR_CLEANROOM_KEYS', File.join(ENV['HOME'], 'teak-air-cleanroom-keys'))
+BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'io.teak.app.air.dev')
 
-BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'com.teakio.pushtest')
+REPACK = ENV.fetch('REPACK', false)
 
 USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION = true
 
 TEST_DISTRIQT = ENV.fetch('TEST_DISTRIQT', false)
 TEST_DISTRIQT_NOTIF = ENV.fetch('TEST_DISTRIQT_NOTIF', false)
-
-TEAK_SDK_VERSION = ENV.fetch('TEAK_SDK_VERSION', nil) ? "-#{ENV.fetch('TEAK_SDK_VERSION')}" : ""
 
 #
 # Play a sound after finished
@@ -36,16 +34,6 @@ def amxmlc(*args)
   sh "#{ADOBE_AIR_HOME}/bin/amxmlc #{escaped_args}"
 end
 
-def adt(*args)
-  escaped_args = args.map { |arg| Shellwords.escape(arg) }.join(' ')
-  sh "AIR_NOANDROIDFLAIR=true #{ADOBE_AIR_HOME}/bin/adt #{escaped_args}"
-end
-
-def codesign(*args)
-  escaped_args = args.map { |arg| Shellwords.escape(arg) }.join(' ')
-  sh "codesign #{escaped_args}"
-end
-
 #
 # Tasks
 #
@@ -56,11 +44,11 @@ end
 
 namespace :package do
   task download: [:clean] do
-    sh "curl -o src/extensions/io.teak.sdk.Teak.ane https://s3.amazonaws.com/teak-build-artifacts/air/io.teak.sdk.Teak#{TEAK_SDK_VERSION}.ane"
+    sh "bundle exec fastlane sdk"
   end
 
   task copy: [:clean] do
-    cp '../teak-air/bin/io.teak.sdk.Teak.ane', 'src/extensions/io.teak.sdk.Teak.ane'
+    sh "FL_TEAK_SDK_SOURCE='../teak-air/' bundle exec fastlane sdk"
   end
 end
 
@@ -86,19 +74,20 @@ namespace :build do
   task :app_xml do
     template = File.read(File.join(PROJECT_PATH, 'src', 'app.xml.template'))
     File.write(File.join(PROJECT_PATH, 'src', 'app.xml'), Mustache.render(template, {
-      bundle_id: BUNDLE_ID, test_distriqt: TEST_DISTRIQT, test_distriqt_notif: TEST_DISTRIQT_NOTIF
+      bundle_id: BUNDLE_ID,
+      test_distriqt: TEST_DISTRIQT,
+      test_distriqt_notif: TEST_DISTRIQT_NOTIF,
+      application: REPACK ? '' : 'android:name="io.teak.sdk.wrapper.air.Application"'
     }))
   end
 
   task android: [:app_xml] do
-    adt "-package", "-target", "apk-captive-runtime", "-keystore", "#{KEYS_PATH}/sample-android.p12",
-      "-storetype", "pkcs12", "-storepass", "123456",
-      "build/teak-air-cleanroom.apk", "src/app.xml", "src/mm.cfg", "-C", "build", "teak-air-cleanroom.swf",
-      "-C", "src/assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
-      "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
+    sh "bundle exec fastlane android build"
 
-    config_path = File.join(PROJECT_PATH, 'src', 'air-repack.config')
-    File.write(config_path, """
+    # Test unpack/repack APK method of integration
+    if REPACK
+      config_path = File.join(PROJECT_PATH, 'src', 'air-repack.config')
+      File.write(config_path, """
 android.build-tools = /usr/local/share/android-sdk/build-tools/25.0.2/
 android.platform-tools = /usr/local/share/android-sdk/platform-tools/
 
@@ -123,24 +112,19 @@ release.keypass = 123456
 release.alias = alias_name
 """)
 
-    cd "../teak-air/android/repacker/" do
-      sh "ant -Duse-config=#{config_path} unpack patch copy_res"
-      cp_r "#{File.join(PROJECT_PATH, 'src', 'res')}", "#{File.join(PROJECT_PATH, 'build', '_apktemp')}"
-      sh "ant -Duse-config=#{config_path} repack debug_sign zipalign"
+      cd "../teak-air/android/repacker/" do
+        sh "ant -Duse-config=#{config_path} unpack patch copy_res"
+        cp_r "#{File.join(PROJECT_PATH, 'src', 'res')}", "#{File.join(PROJECT_PATH, 'build', '_apktemp')}"
+        sh "ant -Duse-config=#{config_path} repack debug_sign zipalign"
+      end
+    else
+      # No repack needed, just copy the file
+      cp "build/teak-air-cleanroom.apk", "teak-air-cleanroom.apk"
     end
-    #cp "build/teak-air-cleanroom.apk", "teak-air-cleanroom.apk"
   end
 
   task ios: [:app_xml] do
-    build_production = false
-    adt "-package", "-target", "#{build_production ? 'ipa-app-store' : 'ipa-debug'}", #"-embedBitcode", "yes",
-      "-keystore", "#{KEYS_PATH}/sample-ios#{build_production ? '' : '-dev'}.p12",
-      "-storetype", "pkcs12", "-storepass", "#{build_production ? '' : '123456'}",
-      "-provisioning-profile", "#{KEYS_PATH}/sample-ios#{build_production ? '' : '-dev'}.mobileprovision",
-      "build/teak-air-cleanroom.ipa", "src/app.xml", "src/mm.cfg", "-C", "build", "teak-air-cleanroom.swf",
-      "-C", "src/assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
-      "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
-    cp 'build/teak-air-cleanroom.ipa', 'teak-air-cleanroom.ipa'
+    sh "bundle exec fastlane ios build"
   end
 end
 
@@ -161,14 +145,6 @@ namespace :install do
 
       begin
         adb.call "uninstall #{BUNDLE_ID}"
-      rescue
-      end
-      begin
-        adb.call "uninstall io.teak.sdk.sd"
-      rescue
-      end
-      begin
-        adb.call "uninstall com.teakio.pushtest"
       rescue
       end
       adb.call "install teak-air-cleanroom.apk"

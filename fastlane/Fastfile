@@ -11,39 +11,105 @@
 TEAK_APP_EXTENSIONS = ["TeakNotificationService", "TeakNotificationContent"]
 CONFIG_TYPE = "development"
 
+#
+# Configuration
+#
+USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION = true
+TEST_DISTRIQT = ENV.fetch('TEST_DISTRIQT', false)
+TEST_DISTRIQT_NOTIF = ENV.fetch('TEST_DISTRIQT_NOTIF', false)
+
+#
+# Adobe AIR Helpers
+#
+ADOBE_AIR_HOME = ENV.fetch('ADOBE_AIR_HOME', '/usr/local/share/adobe-air-sdk')
+
+def adt(*args)
+  escaped_args = args.map { |arg| Shellwords.escape(arg) }.join(' ')
+  sh "AIR_NOANDROIDFLAIR=true #{ADOBE_AIR_HOME}/bin/adt #{escaped_args}"
+end
+
+def amxmlc(*args)
+  escaped_args = args.map { |arg| Shellwords.escape(arg) }.join(' ')
+  sh "#{ADOBE_AIR_HOME}/bin/amxmlc #{escaped_args}"
+end
+
+#
+# Lanes
+#
 default_platform(:ios)
 
+desc "Copy or download the Teak SDK"
+lane :sdk do
+  teak_sdk(
+    sdk: :air,
+    destination: 'src/extensions/'
+  )
+end
+
 platform :ios do
-  desc "Setup"
-  lane :setup do
-    ["io.teak.app.air.dev", "io.teak.app.air.prod"].each do |app_id|
+  lane :build do
+    Helper::TeakHelper.with_credentials_for("io.teak.app.air.dev") do |p12_file, p12_password, mobileprovision|
+      Dir.chdir('..') do
+        adt "-package", "-target", "ipa-debug", #"-embedBitcode", "yes",
+          "-keystore", p12_file, "-storetype", "pkcs12", "-storepass", p12_password,
+          "-provisioning-profile", mobileprovision,
+          "build/teak-air-cleanroom.ipa", "src/app.xml", "src/mm.cfg", "-C", "build", "teak-air-cleanroom.swf",
+          "-C", "src/assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
+          "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
+        FileUtils.cp 'build/teak-air-cleanroom.ipa', 'teak-air-cleanroom.ipa'
+      end
+    end
+  end
+end
+
+platform :android do
+  lane :build do
+    sh "pwd"
+    Helper::TeakHelper.with_kms_for("/Users/pat/Code/teak-air-cleanroom/kms/io.teak.app.air.jks.data",
+                                    "../kms/store_encryption_key.key") do |file|
+      Dir.chdir('..') do
+        adt "-package", "-target", "apk-captive-runtime",
+          "-keystore", file, "-storetype", "jks", "-alias", "dev", "-storepass", "pointless",
+          "build/teak-air-cleanroom.apk", "src/app.xml", "src/mm.cfg", "-C", "build", "teak-air-cleanroom.swf",
+          "-C", "src/assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
+          "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
+      end
+    end
+  end
+end
+
+#
+# Setup
+#
+desc "Create certificates"
+lane :create_certificates do
+  ["io.teak.app.air.dev", "io.teak.app.air.prod"].each do |app_id|
+    produce(
+      app_identifier: app_id,
+      app_name: "Teak Air Cleanroom",
+      skip_itc: true,
+      enable_services: {
+        push_notification: "on",
+        associated_domains: "on"
+      }
+    )
+    match(
+      app_identifier: app_id,
+      type: CONFIG_TYPE,
+      force: true
+    )
+
+    TEAK_APP_EXTENSIONS.each do |app_extension_name|
       produce(
-        app_identifier: app_id,
-        app_name: "Teak Air Cleanroom",
-        skip_itc: true,
-        enable_services: {
-          push_notification: "on",
-          associated_domains: "on"
-        }
+        app_identifier: "#{app_id}.#{app_extension_name}",
+        app_name: app_extension_name,
+        skip_itc: true
       )
       match(
-        app_identifier: app_id,
+        app_identifier: "#{app_id}.#{app_extension_name}",
         type: CONFIG_TYPE,
         force: true
       )
-
-      TEAK_APP_EXTENSIONS.each do |app_extension_name|
-        produce(
-          app_identifier: "#{app_id}.#{app_extension_name}",
-          app_name: app_extension_name,
-          skip_itc: true
-        )
-        match(
-          app_identifier: "#{app_id}.#{app_extension_name}",
-          type: CONFIG_TYPE,
-          force: true
-        )
-      end
     end
   end
 end

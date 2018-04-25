@@ -2,4 +2,5 @@
 #
 # Ensure this file is checked in to source control!
 
-gem 'fastlane-plugin-teak', path: '/Users/pat/Code/fastlane-plugin-teak'
+# bundle config local.fastlane-plugin-teak ~/Code/fastlane-plugin-teak
+gem 'fastlane-plugin-teak', :github => 'fastlane-plugin-teak/fastlane-plugin-teak', :branch => 'master'

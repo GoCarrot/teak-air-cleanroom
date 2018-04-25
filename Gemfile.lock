@@ -1,5 +1,7 @@
-PATH
-  remote: /Users/pat/Code/fastlane-plugin-teak
+GIT
+  remote: git://github.com/fastlane-plugin-teak/fastlane-plugin-teak.git
+  revision: 091c5541544582dccea750150a568cf04a23a540
+  branch: master
   specs:
     fastlane-plugin-teak (0.1.0)
       xcodeproj

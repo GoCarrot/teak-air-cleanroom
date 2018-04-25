@@ -190,8 +190,8 @@ CONFIG::use_teak_to_register_notifications {
 
 		private function teakIdentifyUser():void
 		{
-			var deviceConfiguration:Object = Teak.instance.getDeviceConfiguration();
-			var deviceModel:String = deviceConfiguration.deviceModel;
+			//var deviceConfiguration:Object = Teak.instance.getDeviceConfiguration();
+			var deviceModel:String = "ipad2,1";//deviceConfiguration.deviceModel;
 			Teak.instance.identifyUser("air-" + deviceModel.toLowerCase());
 		}
 
@@ -212,10 +212,11 @@ CONFIG::use_teak_to_register_notifications {
 
 		protected function enterFrameHandler():void
 		{
+			/*
 			if (openSettingsButton) {
 				openSettingsButton.isEnabled = !Teak.instance.areNotificationsEnabled();
 				openSettingsButton.validate();
-			}
+			}*/
 		}
 
 		protected function setupTestUI():void
@@ -257,6 +258,7 @@ CONFIG::use_teak_to_register_notifications {
 			container.addChild(cancelAllButton);
 			cancelAllButton.validate();
 
+/*
 			var userProfileTest:Button = new Button();
 			userProfileTest.label = "Test User Profile"
 			userProfileTest.height = 50;
@@ -279,7 +281,7 @@ CONFIG::use_teak_to_register_notifications {
 			});
 
 			container.addChild(openSettingsButton);
-			openSettingsButton.validate();
+			openSettingsButton.validate();*/
 		}
 
 		protected function advanceTests():void

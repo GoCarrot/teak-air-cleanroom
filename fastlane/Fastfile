@@ -67,7 +67,7 @@ end
 platform :android do
   lane :build do
     sh "pwd"
-    Helper::TeakHelper.with_kms_for("/Users/pat/Code/teak-air-cleanroom/kms/io.teak.app.air.jks.data",
+    Helper::TeakHelper.with_kms_for("../kms/io.teak.app.air.jks.data",
                                     "../kms/store_encryption_key.key") do |file|
       Dir.chdir('..') do
         adt "-package", "-target", "apk-captive-runtime",

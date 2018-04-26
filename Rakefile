@@ -19,11 +19,15 @@ USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION = true
 TEST_DISTRIQT = ENV.fetch('TEST_DISTRIQT', false)
 TEST_DISTRIQT_NOTIF = ENV.fetch('TEST_DISTRIQT_NOTIF', false)
 
+def ci?
+  ENV.fetch('CI', false).to_s == 'true'
+end
+
 #
 # Play a sound after finished
 #
 at_exit do
-  sh "afplay /System/Library/Sounds/Submarine.aiff"
+  sh "afplay /System/Library/Sounds/Submarine.aiff" unless ci?
 end
 
 #

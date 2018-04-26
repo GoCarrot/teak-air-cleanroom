@@ -1,6 +1,7 @@
 require "rake/clean"
 require "shellwords"
 require "mustache"
+require "httparty"
 CLEAN.include "**/.DS_Store"
 
 desc "Build Adobe Air package"
@@ -30,6 +31,12 @@ end
 #
 at_exit do
   sh "afplay /System/Library/Sounds/Submarine.aiff" unless ci?
+
+  # Deploy
+  if ENV.fetch('FORCE_DEPLOY', false).to_s == true
+    Rake::Task["deploy:ios"].invoke
+    Rake::Task["deploy:android"].invoke
+  end
 end
 
 #
@@ -47,6 +54,35 @@ def fastlane(*args, env:{})
   }.merge(env)
   escaped_args = args.map { |arg| Shellwords.escape(arg) }.join(' ')
   sh "#{env.map{|k,v| "#{k}='#{v}'"}.join(' ')} bundle exec fastlane #{escaped_args}"
+end
+
+def build_and_fetch(version, extension)
+  filename = "teak-air-cleanroom-#{version}.#{extension}"
+  if %x[aws s3 ls s3://teak-build-artifacts/air-cleanroom/ | grep #{filename}].empty?
+
+    # Kick off a CircleCI build for that version
+    puts "Version #{version} not found in S3, triggering a CircleCI build..."
+    response = HTTParty.post("https://circleci.com/api/v1.1/project/github/GoCarrot/teak-air-cleanroom/tree/master?circle-token=#{CIRCLE_TOKEN}",
+                             {build_parameters:{FL_TEAK_SDK_VERSION: version, FORCE_DEPLOY: true}, format: :json})
+    build_num = response['build_num']
+    previous_build_time_ms = response['previous_successful_build']['build_time_millis']
+    previous_build_time_sec = previous_build_time_ms * 0.001
+
+    # Sleep for 3/4 of the previous build time
+    puts "Previous successful build took #{previous_build_time_sec} seconds."
+    puts "Waiting #{previous_build_time_sec * 0.75} seconds..."
+    sleep(previous_build_time_sec * 0.75)
+
+    loop do
+      # Get status
+      response = HTTParty.get("https://circleci.com/api/v1.1/project/github/GoCarrot/teak-air-cleanroom/#{build_num}?circle-token=#{CIRCLE_TOKEN}",
+                              {format: :json})
+      break unless response['status'] == "running"
+      puts "Build status: #{response['status']}, checking again in #{previous_build_time_sec * 0.1} seconds"
+      sleep(previous_build_time_sec * 0.1)
+    end
+  end
+  sh "aws s3 sync s3://teak-build-artifacts/air-cleanroom/ . --exclude '*' --include '#{filename}'"
 end
 
 #
@@ -143,17 +179,31 @@ release.alias = alias_name
   end
 end
 
-namespace :install do
+namespace :deploy do
   task :ios do
+    sh "aws s3 cp teak-air-cleanroom.ipa s3://teak-build-artifacts/air-cleanroom/teak-air-cleanroom-`cat TEAK_VERSION`.ipa --acl public-read"
+  end
+
+  task :android do
+    sh "aws s3 cp teak-air-cleanroom.apk s3://teak-build-artifacts/air-cleanroom/teak-air-cleanroom-`cat TEAK_VERSION`.apk --acl public-read"
+  end
+end
+
+namespace :install do
+  task :ios, [:version] do |t, args|
+    ipa_path = args[:version] ? build_and_fetch(args[:version], :ipa) : "teak-air-cleanroom.ipa"
+
     begin
       sh "ideviceinstaller --uninstall #{TEAK_AIR_CLEANROOM_BUNDLE_ID}"
     rescue
     end
     # https://github.com/libimobiledevice/libimobiledevice/issues/510#issuecomment-347175312
-    sh "ideviceinstaller --install teak-air-cleanroom.ipa"
+    sh "ideviceinstaller --install #{ipa_path}"
   end
 
-  task :android do
+  task :android, [:version] do |t, args|
+    apk_path = args[:version] ? build_and_fetch(args[:version], :apk) : "teak-air-cleanroom.apk"
+
     devicelist = %x[AndroidResources/devicelist].split(',').collect{ |x| x.chomp }
     devicelist.each do |device|
       adb = lambda { |*args| sh "adb -s #{device} #{args.join(' ')}" }
@@ -162,7 +212,7 @@ namespace :install do
         adb.call "uninstall #{TEAK_AIR_CLEANROOM_BUNDLE_ID}"
       rescue
       end
-      adb.call "install teak-air-cleanroom.apk"
+      adb.call "install #{apk_path}"
       adb.call "shell am start -n #{TEAK_AIR_CLEANROOM_BUNDLE_ID}/#{TEAK_AIR_CLEANROOM_BUNDLE_ID}.AppEntry"
     end
   end

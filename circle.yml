@@ -3,6 +3,8 @@ machine:
     version: 9.2
   environment:
     ADOBE_AIR_HOME: /usr/local/share/adobe-air-sdk
+    LC_ALL: en_US.UTF-8
+    LANG: en_US.UTF-8
 test:
   override:
   - rake package:download build:air build:android build:ios

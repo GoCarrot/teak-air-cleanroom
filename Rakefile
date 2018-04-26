@@ -19,6 +19,8 @@ USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION = true
 TEST_DISTRIQT = ENV.fetch('TEST_DISTRIQT', false)
 TEST_DISTRIQT_NOTIF = ENV.fetch('TEST_DISTRIQT_NOTIF', false)
 
+CIRCLE_TOKEN = ENV.fetch('CIRCLE_TOKEN', `aws kms decrypt --ciphertext-blob fileb://kms/encrypted_circle_ci_key.data --output text --query Plaintext | base64 --decode`)
+
 def ci?
   ENV.fetch('CI', false).to_s == 'true'
 end

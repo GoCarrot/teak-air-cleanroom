@@ -33,7 +33,7 @@ at_exit do
   sh "afplay /System/Library/Sounds/Submarine.aiff" unless ci?
 
   # Deploy
-  if ENV.fetch('FORCE_DEPLOY', false).to_s == true
+  if ENV.fetch('FORCE_DEPLOY', false).to_s == 'true'
     Rake::Task["deploy:ios"].invoke
     Rake::Task["deploy:android"].invoke
   end

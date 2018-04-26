@@ -66,7 +66,6 @@ end
 
 platform :android do
   lane :build do
-    sh "pwd"
     Helper::TeakHelper.with_kms_for("../kms/io.teak.app.air.jks.data",
                                     "../kms/store_encryption_key.key") do |file|
       Dir.chdir('..') do

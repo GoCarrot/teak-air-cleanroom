@@ -18,8 +18,9 @@ dependencies:
 checkout:
   post:
     - git fetch --tags
-# deployment:
-#   prod:
-#     branch: master
-#     commands:
-#       - aws s3 cp teak-air-cleanroom.ipa s3://teak-build-artifacts/air-cleanroom/teak-air-cleanroom.ipa --acl public-read
+deployment:
+  prod:
+    branch: master
+    commands:
+      - aws s3 cp teak-air-cleanroom.ipa s3://teak-build-artifacts/air-cleanroom/teak-air-cleanroom.ipa --acl public-read
+      - aws s3 cp teak-air-cleanroom.apk s3://teak-build-artifacts/air-cleanroom/teak-air-cleanroom.apk --acl public-read

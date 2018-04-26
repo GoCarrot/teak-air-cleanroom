@@ -12,3 +12,5 @@ src/extensions/io.teak.sdk.Teak.ane
 
 fastlane/README.md
 fastlane/report.xml
+
+TEAK_VERSION

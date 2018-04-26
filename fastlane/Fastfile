@@ -42,10 +42,11 @@ default_platform(:ios)
 
 desc "Copy or download the Teak SDK"
 lane :sdk do
-  teak_sdk(
+  version = teak_sdk(
     sdk: :air,
     destination: 'src/extensions/'
   )
+  File.write(File.join("..", "TEAK_VERSION"), version)
 end
 
 platform :ios do

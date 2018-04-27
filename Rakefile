@@ -87,6 +87,7 @@ def build_and_fetch(version, extension)
     end
   end
   sh "aws s3 sync s3://teak-build-artifacts/air-cleanroom/ . --exclude '*' --include '#{filename}'"
+  filename
 end
 
 #

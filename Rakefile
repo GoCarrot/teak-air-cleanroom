@@ -21,6 +21,7 @@ TEST_DISTRIQT = ENV.fetch('TEST_DISTRIQT', false)
 TEST_DISTRIQT_NOTIF = ENV.fetch('TEST_DISTRIQT_NOTIF', false)
 
 CIRCLE_TOKEN = ENV.fetch('CIRCLE_TOKEN', `aws kms decrypt --ciphertext-blob fileb://kms/encrypted_circle_ci_key.data --output text --query Plaintext | base64 --decode`)
+FORCE_CIRCLE_BUILD_ON_FETCH = ENV.fetch('FORCE_CIRCLE_BUILD_ON_FETCH', false)
 
 def ci?
   ENV.fetch('CI', false).to_s == 'true'
@@ -52,7 +53,7 @@ end
 
 def build_and_fetch(version, extension)
   filename = "teak-air-cleanroom-#{version}.#{extension}"
-  if %x[aws s3 ls s3://teak-build-artifacts/air-cleanroom/ | grep #{filename}].empty?
+  if FORCE_CIRCLE_BUILD_ON_FETCH.to_s == 'true' || %x[aws s3 ls s3://teak-build-artifacts/air-cleanroom/ | grep #{filename}].empty?
 
     # Kick off a CircleCI build for that version
     puts "Version #{version} not found in S3, triggering a CircleCI build..."

@@ -31,12 +31,6 @@ end
 #
 at_exit do
   sh "afplay /System/Library/Sounds/Submarine.aiff" unless ci?
-
-  # Deploy
-  if ENV.fetch('FORCE_DEPLOY', false).to_s == 'true'
-    Rake::Task["deploy:ios"].invoke
-    Rake::Task["deploy:android"].invoke
-  end
 end
 
 #
@@ -63,7 +57,17 @@ def build_and_fetch(version, extension)
     # Kick off a CircleCI build for that version
     puts "Version #{version} not found in S3, triggering a CircleCI build..."
     response = HTTParty.post("https://circleci.com/api/v1.1/project/github/GoCarrot/teak-air-cleanroom/tree/master?circle-token=#{CIRCLE_TOKEN}",
-                             {build_parameters:{FL_TEAK_SDK_VERSION: version, FORCE_DEPLOY: true}, format: :json})
+                              {
+                                body: {
+                                  build_parameters:{
+                                    FL_TEAK_SDK_VERSION: version
+                                  }
+                                }.to_json,
+                                headers: {
+                                  'Content-Type' => 'application/json',
+                                  'Accept' => 'application/json'
+                                }
+                              })
     build_num = response['build_num']
     previous_build_time_ms = response['previous_successful_build']['build_time_millis']
     previous_build_time_sec = previous_build_time_ms * 0.001

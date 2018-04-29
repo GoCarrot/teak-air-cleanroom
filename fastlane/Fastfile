@@ -79,39 +79,3 @@ platform :android do
     end
   end
 end
-
-#
-# Setup
-#
-desc "Create certificates"
-lane :create_certificates do
-  ["io.teak.app.air.dev", "io.teak.app.air.prod"].each do |app_id|
-    produce(
-      app_identifier: app_id,
-      app_name: "Teak Air Cleanroom",
-      skip_itc: true,
-      enable_services: {
-        push_notification: "on",
-        associated_domains: "on"
-      }
-    )
-    match(
-      app_identifier: app_id,
-      type: CONFIG_TYPE,
-      force: true
-    )
-
-    TEAK_APP_EXTENSIONS.each do |app_extension_name|
-      produce(
-        app_identifier: "#{app_id}.#{app_extension_name}",
-        app_name: app_extension_name,
-        skip_itc: true
-      )
-      match(
-        app_identifier: "#{app_id}.#{app_extension_name}",
-        type: CONFIG_TYPE,
-        force: true
-      )
-    end
-  end
-end

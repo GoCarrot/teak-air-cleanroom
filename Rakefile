@@ -75,8 +75,8 @@ def build_and_fetch(version, extension)
 
     # Sleep for 3/4 of the previous build time
     puts "Previous successful build took #{previous_build_time_sec} seconds."
-    puts "Waiting #{previous_build_time_sec * 0.75} seconds..."
-    sleep(previous_build_time_sec * 0.75)
+    puts "Waiting #{previous_build_time_sec * 0.90} seconds..."
+    sleep(previous_build_time_sec * 0.90)
 
     loop do
       # Get status

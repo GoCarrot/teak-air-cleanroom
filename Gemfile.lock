@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/gocarrot/fastlane-plugin-teak.git
-  revision: c3b2b701109a0fe9a27f968c024571e4154435d9
+  revision: 60fe2350114442fcecae7c7f720dcb8423a365af
   branch: master
   specs:
     fastlane-plugin-teak (0.1.0)

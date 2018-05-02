@@ -12,6 +12,8 @@ ADOBE_AIR_HOME = ENV.fetch('ADOBE_AIR_HOME', '/usr/local/share/adobe-air-sdk')
 PROJECT_PATH = Rake.application.original_dir
 
 TEAK_AIR_CLEANROOM_BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'io.teak.app.air.dev')
+TEAK_AIR_CLEANROOM_APP_ID = ENV.fetch('TEAK_AIR_CLEANROOM_APP_ID', '613659812345256')
+TEAK_AIR_CLEANROOM_API_KEY = ENV.fetch('TEAK_AIR_CLEANROOM_API_KEY', '41ff00cfd4cb85702e265aa3d5ab7858')
 
 REPACK = ENV.fetch('REPACK', false)
 
@@ -135,6 +137,8 @@ namespace :build do
       test_distriqt: TEST_DISTRIQT,
       test_distriqt_notif: TEST_DISTRIQT_NOTIF,
       application: REPACK ? '' : 'android:name="io.teak.sdk.wrapper.Application"',
+      app_id: TEAK_AIR_CLEANROOM_APP_ID,
+      api_key: TEAK_AIR_CLEANROOM_API_KEY
     }))
   end
 
@@ -154,8 +158,8 @@ temp.apk = #{File.join(PROJECT_PATH, 'build', '_temp.apk')}
 input.apk = #{File.join(PROJECT_PATH, 'build', 'teak-air-cleanroom.apk')}
 output.apk = #{File.join(PROJECT_PATH, 'teak-air-cleanroom.apk')}
 
-teak.app_id = 1136371193060244
-teak.api_key = 1f3850f794b9093864a0778009744d03
+teak.app_id = #{TEAK_AIR_CLEANROOM_APP_ID}
+teak.api_key = #{TEAK_AIR_CLEANROOM_API_KEY}
 teak.gcm_sender_id = 944348058057
 
 debug.storetype = pkcs12

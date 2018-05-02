@@ -42,9 +42,9 @@
                 </array>
 
                 <key>TeakAppId</key>
-                <string>1136371193060244</string>
+                <string>{{app_id}}</string>
                 <key>TeakApiKey</key>
-                <string>1f3850f794b9093864a0778009744d03</string>
+                <string>{{api_key}}</string>
 
                 <key>UIBackgroundModes</key>
                 <array>
@@ -56,14 +56,14 @@
                     <dict>
                         <key>CFBundleURLSchemes</key>
                         <array>
-                            <string>teak1136371193060244</string>
-                            <string>fb1136371193060244</string>
+                            <string>teak{{app_id}}</string>
+                            <string>fb{{app_id}}</string>
                         </array>
                     </dict>
                 </array>
 
                 <key>FacebookAppID</key>
-                <string>1136371193060244</string>
+                <string>{{app_id}}</string>
 
                 <key>NSAppTransportSecurity</key>
                 <dict>
@@ -120,8 +120,8 @@
             <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 
             <application android:debuggable="true" {{{application}}}>
-                <meta-data android:name="io_teak_app_id" android:value="teak1136371193060244" />
-                <meta-data android:name="io_teak_api_key" android:value="teak1f3850f794b9093864a0778009744d03" />
+                <meta-data android:name="io_teak_app_id" android:value="teak{{app_id}}" />
+                <meta-data android:name="io_teak_api_key" android:value="teak{{api_key}}" />
                 <meta-data android:name="io_teak_gcm_sender_id" android:value="teak944348058057" />
 
                 <activity>
@@ -148,7 +148,7 @@
                         <category android:name="android.intent.category.DEFAULT" />
                         <category android:name="android.intent.category.BROWSABLE" />
 
-                        <data android:scheme="teak1136371193060244" android:host="*" />
+                        <data android:scheme="teak{{app_id}}" android:host="*" />
                     </intent-filter>
                 </activity>
 
@@ -176,7 +176,7 @@
                 </service>
 
                 <meta-data android:name="com.facebook.sdk.ApplicationId" 
-                           android:value="fb1136371193060244"/>
+                           android:value="fb{{app_id}}"/>
 
                 <activity android:name="com.facebook.FacebookActivity" 
                           android:theme="@android:style/Theme.Translucent.NoTitleBar" android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation" android:label="Teak Angry Bots" />

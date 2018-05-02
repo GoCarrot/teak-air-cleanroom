@@ -227,3 +227,13 @@ namespace :install do
     end
   end
 end
+
+namespace :android do
+  task :kill do
+    devicelist = %x[AndroidResources/devicelist].split(',').collect{ |x| x.chomp }
+    devicelist.each do |device|
+      adb = lambda { |*args| sh "adb -s #{device} #{args.join(' ')}" }
+      adb.call "shell", "pm", "clear", TEAK_AIR_CLEANROOM_BUNDLE_ID
+    end
+  end
+end

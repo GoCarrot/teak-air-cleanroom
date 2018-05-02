@@ -134,7 +134,7 @@ namespace :build do
       bundle_id: TEAK_AIR_CLEANROOM_BUNDLE_ID,
       test_distriqt: TEST_DISTRIQT,
       test_distriqt_notif: TEST_DISTRIQT_NOTIF,
-      application: REPACK ? '' : 'android:name="io.teak.sdk.wrapper.air.Application"'
+      application: REPACK ? '' : 'android:name="io.teak.sdk.wrapper.Application"',
     }))
   end
 

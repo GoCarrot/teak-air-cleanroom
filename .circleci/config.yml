@@ -28,7 +28,7 @@ jobs:
           key: v0-{{ checksum "setup" }}-{{ checksum "Gemfile.lock" }}
       - run:
           name: Build Teak Cleanroom
-          command: rake package:download build:air build:android build:ios
+          command: bundle exec rake package:download build:air build:android build:ios
       - persist_to_workspace:
           root: .
           paths:

@@ -6,6 +6,5 @@ if [ "$(which ant)" == "" ]; then brew install ant; fi
 if [ "$(which aws)" == "" ]; then brew install awscli; fi
 if [ "$(which compc)" == "" ]; then
   brew tap gocarrot/airversions
-  brew update
   brew cask install adobe-air-sdk@28.0
 fi

@@ -97,8 +97,7 @@ end
 # Tasks
 #
 task :clean do
-  #sh "git clean -fdx"
-  puts "DO CLEAN HERE WHEN DONE"
+  sh "git clean -fdx" unless ci?
 end
 
 namespace :package do

@@ -190,11 +190,11 @@ end
 
 namespace :deploy do
   task :ios do
-    sh "aws s3 cp teak-air-cleanroom.ipa s3://teak-build-artifacts/air-cleanroom/teak-air-cleanroom-`cat TEAK_VERSION`.ipa --acl public-read --dryrun"
+    sh "aws s3 cp teak-air-cleanroom.ipa s3://teak-build-artifacts/air-cleanroom/teak-air-cleanroom-`cat TEAK_VERSION`.ipa --acl public-read"
   end
 
   task :android do
-    sh "aws s3 cp teak-air-cleanroom.apk s3://teak-build-artifacts/air-cleanroom/teak-air-cleanroom-`cat TEAK_VERSION`.apk --acl public-read --dryrun"
+    sh "aws s3 cp teak-air-cleanroom.apk s3://teak-build-artifacts/air-cleanroom/teak-air-cleanroom-`cat TEAK_VERSION`.apk --acl public-read"
   end
 end
 

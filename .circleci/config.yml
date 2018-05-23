@@ -37,6 +37,7 @@ jobs:
           paths:
             - teak-air-cleanroom.ipa
             - teak-air-cleanroom.apk
+            - TEAK_VERSION
   deploy:
     docker:
       - image: circleci/ruby:latest

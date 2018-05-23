@@ -31,7 +31,7 @@ jobs:
             - "ab:48:b1:f2:a7:e9:0f:ba:81:3b:0c:16:48:6b:91:3d"
       - run:
           name: Build Teak Cleanroom
-          command: bundle exec rake package:download build:air build:android build:ios
+          command: bundle exec rake package:download build:air $RAKE_BUILD_TASKS
       - persist_to_workspace:
           root: .
           paths:
@@ -59,13 +59,26 @@ jobs:
           at: .
       - run:
           name: Upload Cleanroom Apps to S3
-          command: bundle exec rake deploy:ios deploy:android
+          command: bundle exec rake $RAKE_DEPLOY_TASKS
 workflows:
   version: 2
-  build_and_deploy:
+  android:
     jobs:
-      - build
+      - build:
+          context: android-cleanroom
       - deploy:
+          context: android-cleanroom
+          requires:
+            - build
+          filters:
+            branches:
+              only: [master, /hotfix.*/]
+  ios:
+    jobs:
+      - build:
+          context: ios-cleanroom
+      - deploy:
+          context: ios-cleanroom
           requires:
             - build
           filters:

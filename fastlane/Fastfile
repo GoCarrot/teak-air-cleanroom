@@ -57,7 +57,7 @@ platform :ios do
           "-keystore", p12_file, "-storetype", "pkcs12", "-storepass", p12_password,
           "-provisioning-profile", mobileprovision,
           "build/teak-air-cleanroom.ipa", "src/app.xml", "src/mm.cfg", "-C", "build", "teak-air-cleanroom.swf",
-          "-C", "src/assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
+          "-C", "src/build-assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
           "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
         FileUtils.cp 'build/teak-air-cleanroom.ipa', 'teak-air-cleanroom.ipa'
       end
@@ -73,8 +73,48 @@ platform :android do
         adt "-package", "-target", "apk-captive-runtime",
           "-keystore", file, "-storetype", "jks", "-alias", "dev", "-storepass", "pointless",
           "build/teak-air-cleanroom.apk", "src/app.xml", "src/mm.cfg", "-C", "build", "teak-air-cleanroom.swf",
-          "-C", "src/assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
+          "-C", "src/build-assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
           "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
+      end
+    end
+  end
+
+  lane :repack do
+    #
+    # Future-Pat: __FILE__ seems to not work in Fastfile
+    #
+    project_path = File.join(Dir.pwd, '..')
+
+    Helper::TeakHelper.with_kms_for("../kms/io.teak.app.air.jks.data",
+                                    "../kms/store_encryption_key.key") do |file|
+      config_path = File.join(project_path, 'src', 'air-repack.config')
+
+      File.write(config_path, """
+android.build-tools = /usr/local/share/android-sdk/build-tools/25.0.2/
+android.platform-tools = /usr/local/share/android-sdk/platform-tools/
+
+temp.path = #{File.join(project_path, 'build', '_apktemp')}
+temp.apk = #{File.join(project_path, 'build', '_temp.apk')}
+
+input.apk = #{File.join(project_path, 'build', 'teak-air-cleanroom.apk')}
+output.apk = #{File.join(project_path, 'teak-air-cleanroom.apk')}
+
+debug.storetype = jks
+debug.keystore = #{file}
+debug.keypass = pointless
+debug.alias = dev
+
+release.storetype = jks
+release.keystore = #{file}
+release.keypass = pointless
+release.alias = dev
+""")
+
+      Dir.chdir('../../teak-air/android/repacker/') do
+        `ant -Duse-config=#{config_path} unpack patch`
+        FileUtils.cp_r "#{File.join(project_path, 'src', 'res')}", "#{File.join(project_path, 'build', '_apktemp')}"
+        FileUtils.cp_r "#{File.join(project_path, 'src', 'assets')}", "#{File.join(project_path, 'build', '_apktemp')}"
+        `ant -Duse-config=#{config_path} repack debug_sign zipalign`
       end
     end
   end

@@ -15,8 +15,6 @@ TEAK_AIR_CLEANROOM_BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'io.tea
 TEAK_AIR_CLEANROOM_APP_ID = ENV.fetch('TEAK_AIR_CLEANROOM_APP_ID', '613659812345256')
 TEAK_AIR_CLEANROOM_API_KEY = ENV.fetch('TEAK_AIR_CLEANROOM_API_KEY', '41ff00cfd4cb85702e265aa3d5ab7858')
 
-REPACK = ENV.fetch('REPACK', false)
-
 USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION = true
 
 TEST_DISTRIQT = ENV.fetch('TEST_DISTRIQT', false)
@@ -28,6 +26,10 @@ FORCE_CIRCLE_BUILD_ON_FETCH = ENV.fetch('FORCE_CIRCLE_BUILD_ON_FETCH', false)
 
 def ci?
   ENV.fetch('CI', false).to_s == 'true'
+end
+
+def repack?
+  ENV.fetch('REPACK', true).to_s == 'true'
 end
 
 #
@@ -126,7 +128,7 @@ namespace :build do
       "-define+=CONFIG::use_air_to_register_notifications,#{USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION}",
       "-define+=CONFIG::use_teak_to_register_notifications,#{!USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION}",
       "-output", "build/teak-air-cleanroom.swf", "-swf-version=29", "-default-size=320,480",
-      "-default-background-color=#b1b1b1", "-debug", "-compiler.include-libraries=src/assets/feathers.swc,src/assets/MetalWorksMobileTheme.swc,src/assets/starling.swc",
+      "-default-background-color=#b1b1b1", "-debug", "-compiler.include-libraries=src/build-assets/feathers.swc,src/build-assets/MetalWorksMobileTheme.swc,src/build-assets/starling.swc",
       "src/io/teak/sdk/cleanroom/Test.as", "src/io/teak/sdk/cleanroom/Main.as", "src/Cleanroom.as"
   end
 
@@ -136,7 +138,7 @@ namespace :build do
       bundle_id: TEAK_AIR_CLEANROOM_BUNDLE_ID,
       test_distriqt: TEST_DISTRIQT,
       test_distriqt_notif: TEST_DISTRIQT_NOTIF,
-      application: REPACK ? '' : 'android:name="io.teak.sdk.wrapper.Application"',
+      application: repack? ? '' : 'android:name="io.teak.sdk.wrapper.Application"',
       app_id: TEAK_AIR_CLEANROOM_APP_ID,
       api_key: TEAK_AIR_CLEANROOM_API_KEY
     }))
@@ -146,38 +148,8 @@ namespace :build do
     fastlane "android", "build"
 
     # Test unpack/repack APK method of integration
-    if REPACK
-      config_path = File.join(PROJECT_PATH, 'src', 'air-repack.config')
-      File.write(config_path, """
-android.build-tools = /usr/local/share/android-sdk/build-tools/25.0.2/
-android.platform-tools = /usr/local/share/android-sdk/platform-tools/
-
-temp.path = #{File.join(PROJECT_PATH, 'build', '_apktemp')}
-temp.apk = #{File.join(PROJECT_PATH, 'build', '_temp.apk')}
-
-input.apk = #{File.join(PROJECT_PATH, 'build', 'teak-air-cleanroom.apk')}
-output.apk = #{File.join(PROJECT_PATH, 'teak-air-cleanroom.apk')}
-
-teak.app_id = #{TEAK_AIR_CLEANROOM_APP_ID}
-teak.api_key = #{TEAK_AIR_CLEANROOM_API_KEY}
-teak.gcm_sender_id = 944348058057
-
-debug.storetype = pkcs12
-debug.keystore = #{File.join(KEYS_PATH, 'sample-android.p12')}
-debug.keypass = 123456
-debug.alias = alias_name
-
-release.storetype = pkcs12
-release.keystore = #{File.join(KEYS_PATH, 'sample-android.p12')}
-release.keypass = 123456
-release.alias = alias_name
-""")
-
-      cd "../teak-air/android/repacker/" do
-        sh "ant -Duse-config=#{config_path} unpack patch copy_res"
-        cp_r "#{File.join(PROJECT_PATH, 'src', 'res')}", "#{File.join(PROJECT_PATH, 'build', '_apktemp')}"
-        sh "ant -Duse-config=#{config_path} repack debug_sign zipalign"
-      end
+    if repack?
+      fastlane "android", "repack"
     else
       # No repack needed, just copy the file
       cp "build/teak-air-cleanroom.apk", "teak-air-cleanroom.apk"

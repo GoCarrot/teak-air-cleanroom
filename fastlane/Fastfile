@@ -57,7 +57,7 @@ platform :ios do
           "-keystore", p12_file, "-storetype", "pkcs12", "-storepass", p12_password,
           "-provisioning-profile", mobileprovision,
           "build/teak-air-cleanroom.ipa", "src/app.xml", "src/mm.cfg", "-C", "build", "teak-air-cleanroom.swf",
-          "-C", "src/build-assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
+          "-C", "src/assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
           "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
         FileUtils.cp 'build/teak-air-cleanroom.ipa', 'teak-air-cleanroom.ipa'
       end
@@ -73,7 +73,7 @@ platform :android do
         adt "-package", "-target", "apk-captive-runtime",
           "-keystore", file, "-storetype", "jks", "-alias", "dev", "-storepass", "pointless",
           "build/teak-air-cleanroom.apk", "src/app.xml", "src/mm.cfg", "-C", "build", "teak-air-cleanroom.swf",
-          "-C", "src/build-assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
+          "-C", "src/assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
           "Default@2x.png", "Default-568h@2x.png", "api_key.txt", "-extdir", "src/extensions"
       end
     end

@@ -128,7 +128,7 @@ namespace :build do
       "-define+=CONFIG::use_air_to_register_notifications,#{USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION}",
       "-define+=CONFIG::use_teak_to_register_notifications,#{!USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION}",
       "-output", "build/teak-air-cleanroom.swf", "-swf-version=29", "-default-size=320,480",
-      "-default-background-color=#b1b1b1", "-debug", "-compiler.include-libraries=src/build-assets/feathers.swc,src/build-assets/MetalWorksMobileTheme.swc,src/build-assets/starling.swc",
+      "-default-background-color=#b1b1b1", "-debug", "-compiler.include-libraries=src/assets/feathers.swc,src/assets/MetalWorksMobileTheme.swc,src/assets/starling.swc",
       "src/io/teak/sdk/cleanroom/Test.as", "src/io/teak/sdk/cleanroom/Main.as", "src/Cleanroom.as"
   end
 

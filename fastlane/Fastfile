@@ -111,7 +111,7 @@ release.alias = dev
 """)
 
       Dir.chdir('../../teak-air/android/repacker/') do
-        `ant -Duse-config=#{config_path} unpack patch`
+        `ant -Duse-config=#{config_path} unpack patch xmlns_amazon enable_adm`
         FileUtils.cp_r "#{File.join(project_path, 'src', 'res')}", "#{File.join(project_path, 'build', '_apktemp')}"
         #FileUtils.cp_r "#{File.join(project_path, 'src', 'assets')}", "#{File.join(project_path, 'build', '_apktemp')}"
         `ant -Duse-config=#{config_path} repack debug_sign zipalign`

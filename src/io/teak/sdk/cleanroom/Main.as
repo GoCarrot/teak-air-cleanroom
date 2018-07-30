@@ -280,6 +280,17 @@ CONFIG::use_teak_to_register_notifications {
 
 			container.addChild(openSettingsButton);
 			openSettingsButton.validate();
+
+			var testExceptionReporting:Button = new Button();
+			testExceptionReporting.label = "Test Exception Reporting"
+			testExceptionReporting.height = 50;
+			testExceptionReporting.layoutData = layoutData;
+			testExceptionReporting.addEventListener(Event.TRIGGERED, function(event:Event):void {
+				Teak.instance.testExceptionReporting();
+			});
+
+			container.addChild(testExceptionReporting);
+			testExceptionReporting.validate();
 		}
 
 		protected function advanceTests():void

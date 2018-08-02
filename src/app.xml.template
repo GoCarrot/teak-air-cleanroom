@@ -119,6 +119,13 @@
             <uses-permission android:name="{{bundle_id}}.permission.C2D_MESSAGE"/>
             <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 
+            <permission
+                android:name="{{bundle_id}}.permission.RECEIVE_ADM_MESSAGE"
+                android:protectionLevel="signature" />
+            <uses-permission android:name="{{bundle_id}}.permission.RECEIVE_ADM_MESSAGE" />
+            <uses-permission android:name="com.amazon.device.messaging.permission.RECEIVE" />
+            <uses-permission android:name="android.permission.WAKE_LOCK" />
+
             <application android:debuggable="true" {{{application}}}>
                 <meta-data android:name="io_teak_app_id" android:value="teak{{app_id}}" />
                 <meta-data android:name="io_teak_api_key" android:value="teak{{api_key}}" />
@@ -165,13 +172,6 @@
                     </intent-filter>
                 </receiver>
 
-                <permission
-                    android:name="YOUR_PACKAGE_NAME.permission.RECEIVE_ADM_MESSAGE"
-                    android:protectionLevel="signature" />
-                <uses-permission android:name="YOUR_PACKAGE_NAME.permission.RECEIVE_ADM_MESSAGE" />
-                <uses-permission android:name="com.amazon.device.messaging.permission.RECEIVE" />
-                <uses-permission android:name="android.permission.WAKE_LOCK" />
-
                 <service android:name="placeholder.enable.adm" />
 
                 <service android:name="io.teak.sdk.push.ADMPushProvider"
@@ -182,7 +182,7 @@
                     <intent-filter>
                         <action android:name="com.amazon.device.messaging.intent.REGISTRATION" />
                         <action android:name="com.amazon.device.messaging.intent.RECEIVE" />
-                        <category android:name="YOUR_PACKAGE_NAME" />
+                        <category android:name="{{bundle_id}}" />
                     </intent-filter>
                 </receiver>
 

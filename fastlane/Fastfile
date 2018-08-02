@@ -109,12 +109,13 @@ release.keystore = #{file}
 release.keypass = pointless
 release.alias = dev
 """)
+      sh "echo Signing package: #{TEAK_AIR_CLEANROOM_BUNDLE_ID}"
+      sh "pointless | keytool -list -v -alias dev -keystore #{file}"
 
       Dir.chdir('../../teak-air/android/repacker/') do
-        `ant -Duse-config=#{config_path} unpack patch xmlns_amazon enable_adm`
+        sh "ant -Duse-config=#{config_path} unpack patch xmlns_amazon enable_adm"
         FileUtils.cp_r "#{File.join(project_path, 'src', 'res')}", "#{File.join(project_path, 'build', '_apktemp')}"
-        #FileUtils.cp_r "#{File.join(project_path, 'src', 'assets')}", "#{File.join(project_path, 'build', '_apktemp')}"
-        `ant -Duse-config=#{config_path} repack debug_sign zipalign`
+        sh "ant -Duse-config=#{config_path} repack debug_sign zipalign"
       end
     end
   end

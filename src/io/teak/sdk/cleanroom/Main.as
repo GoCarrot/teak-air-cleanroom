@@ -84,14 +84,14 @@ CONFIG::use_air_to_register_notifications {
 				var subscribeOptions:RemoteNotifierSubscribeOptions = new RemoteNotifierSubscribeOptions();
 				var remoteNot:RemoteNotifier = new RemoteNotifier();
 
-				preferredStyles.push(NotificationStyle.ALERT, NotificationStyle.BADGE, NotificationStyle.SOUND );
+				preferredStyles.push(NotificationStyle.ALERT, NotificationStyle.BADGE, NotificationStyle.SOUND);
 				subscribeOptions.notificationStyles = preferredStyles;
 
 				// Request notification permissions on iOS with the popup
 				remoteNot.subscribe(subscribeOptions);
 }
 CONFIG::use_teak_to_register_notifications {
-
+				//Teak.instance.registerForProvisionalNotifications();
 				Teak.instance.registerForNotifications();
 }
 		}

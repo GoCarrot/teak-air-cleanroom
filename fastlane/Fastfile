@@ -35,6 +35,11 @@ def amxmlc(*args)
   sh "#{ADOBE_AIR_HOME}/bin/amxmlc #{escaped_args}"
 end
 
+def fastlane(*args)
+  escaped_args = args.map { |arg| Shellwords.escape(arg) }.join(' ')
+  sh "bundle exec fastlane #{escaped_args}"
+end
+
 #
 # Lanes
 #
@@ -51,6 +56,63 @@ end
 
 platform :ios do
   lane :build do
+    # hax
+    signing_identity = "iPhone Developer: Teak Devices (U756J7538G)"
+    team_id = "7FLZTACJ82"
+
+    ios_provisioning_profile = {}
+    [TEAK_AIR_CLEANROOM_BUNDLE_ID].each do |app_id|
+      TEAK_APP_EXTENSIONS.each do |app_extension_name|
+        match(
+          app_identifier: "#{app_id}.#{app_extension_name}",
+          type: CONFIG_TYPE,
+          readonly: true
+        )
+
+        provisioning_profile_env = Match::Utils.environment_variable_name_profile_path(
+          app_identifier: "#{app_id}.#{app_extension_name}",
+          type: CONFIG_TYPE
+        )
+        ios_provisioning_profile[app_extension_name] = ENV[provisioning_profile_env]
+      end
+    end
+
+    # Prepare app extensions
+    Dir.chdir('..') do
+      TEAK_APP_EXTENSIONS.each do |extension|
+        app_extension_bundle_id = "#{TEAK_AIR_CLEANROOM_BUNDLE_ID}.#{extension}"
+        Helper::TeakHelper.with_credentials_for("#{app_extension_bundle_id}") do |p12_file, p12_password, mobileprovision|
+          # Extract entitlements
+          sh "codesign -d --entitlements :#{extension}.plist #{extension}.appex/"
+          sh "plutil -p #{extension}.plist"
+
+          # Modify entitlements
+          sh "plutil -replace \"application-identifier\" -string \"#{team_id}.#{app_extension_bundle_id}\" #{extension}.plist"
+          sh "plutil -replace \"com\\.apple\\.developer\\.team-identifier\" -string \"#{team_id}\" #{extension}.plist"
+          # TODO: com.apple.developer.associated-domains properly
+          begin
+            sh "plutil -remove \"com\\.apple\\.developer\\.associated-domains\" #{extension}.plist"
+          rescue
+          end
+
+          # Remove _CodeSignature or re-sign will fail
+          sh "rm -fr #{extension}.appex/_CodeSignature"
+
+          # Modify Info.plist
+          sh "plutil -replace CFBundleIdentifier -string \"#{app_extension_bundle_id}\" #{extension}.appex/Info.plist"
+
+          # Copy in provisioning profile
+          sh "cp \"#{ios_provisioning_profile[extension]}\" #{extension}.appex/embedded.mobileprovision"
+
+          # Re-sign extension
+          sh "codesign -f -s \"#{signing_identity}\" --entitlements #{extension}.plist #{extension}.appex"
+
+          # Cleanup
+          sh "rm #{extension}.plist"
+        end
+      end
+    end
+
     Helper::TeakHelper.with_credentials_for(TEAK_AIR_CLEANROOM_BUNDLE_ID) do |p12_file, p12_password, mobileprovision|
       Dir.chdir('..') do
         adt "-package", "-target", "ipa-debug", #"-embedBitcode", "yes",
@@ -59,6 +121,46 @@ platform :ios do
           "build/teak-air-cleanroom.ipa", "src/app.xml", "src/mm.cfg", "-C", "build", "teak-air-cleanroom.swf",
           "-C", "src/assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
           "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
+
+        Dir.mktmpdir do |tmpdir|
+          # Unzip to tmpdir
+          sh "unzip -q build/teak-air-cleanroom.ipa -d #{tmpdir}"
+          FileUtils.rm 'build/teak-air-cleanroom.ipa'
+
+          app_dir = File.basename(Dir.glob("#{tmpdir}/Payload/*.app").first)
+
+          # Copy in app extensions
+          FileUtils.mkdir "#{tmpdir}/Payload/#{app_dir}/PlugIns"
+          FileUtils.cp_r Dir.glob('*.appex'), "#{tmpdir}/Payload/#{app_dir}/PlugIns/"
+
+          Dir.chdir(tmpdir) do
+            #sh "find \"$PWD\""
+
+            # Replace embedded provisioning profile
+            sh "cp \"#{mobileprovision}\" Payload/#{app_dir}/embedded.mobileprovision"
+
+            # Extract entitlements from app
+            sh "codesign -d --entitlements :entitlements.plist Payload/#{app_dir}"
+
+            # Re-sign embedded frameworks (if there are any)
+            begin
+              sh "codesign -f -s \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}/Frameworks/*"
+            rescue
+            end
+
+            # Re-sign app
+            sh "codesign -f -s \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}"
+
+            # Re-zip
+            sh "zip -qr teak-air-cleanroom.ipa Payload"
+
+            # Cleanup
+            sh "rm entitlements.plist"
+            sh "rm -r Payload/"
+          end
+          FileUtils.cp "#{tmpdir}/teak-air-cleanroom.ipa", 'build/teak-air-cleanroom.ipa'
+        end
+
         FileUtils.cp 'build/teak-air-cleanroom.ipa', 'teak-air-cleanroom.ipa'
       end
     end

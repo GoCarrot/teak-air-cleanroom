@@ -29,7 +29,7 @@
 
                 <key>com.apple.developer.associated-domains</key>
                 <array>
-                    <string>applinks:teakangrybots.jckpt.me</string>
+                    <string>applinks:teak-dev.jckpt.me</string>
                 </array>
             ]]>
        </Entitlements>
@@ -143,10 +143,10 @@
                         <category android:name="android.intent.category.BROWSABLE" />
 
                         <data
-                            android:host="teakangrybots.jckpt.me"
+                            android:host="teak-dev.jckpt.me"
                             android:scheme="http" />
                         <data
-                            android:host="teakangrybots.jckpt.me"
+                            android:host="teak-dev.jckpt.me"
                             android:scheme="https" />
                     </intent-filter>
                     <intent-filter>

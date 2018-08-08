@@ -5,6 +5,9 @@ src/app.xml
 
 build/
 
+TeakNotificationContent.appex
+TeakNotificationService.appex
+
 teak-air-cleanroom*.ipa
 teak-air-cleanroom*.apk
 

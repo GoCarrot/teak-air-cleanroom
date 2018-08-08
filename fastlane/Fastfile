@@ -80,6 +80,8 @@ platform :ios do
     # Prepare app extensions
     Dir.chdir('..') do
       TEAK_APP_EXTENSIONS.each do |extension|
+        sh "mkdir -p #{extension}.appex/"
+        sh "cp -R ../teak-ios/Sample/build/Release-iphoneos/#{extension}.appex/ #{extension}.appex/"
         app_extension_bundle_id = "#{TEAK_AIR_CLEANROOM_BUNDLE_ID}.#{extension}"
         Helper::TeakHelper.with_credentials_for("#{app_extension_bundle_id}") do |p12_file, p12_password, mobileprovision|
           # Extract entitlements

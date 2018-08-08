@@ -1,11 +1,15 @@
 package io.teak.sdk.cleanroom
 {
 	import feathers.core.ITextRenderer;
+
+	import feathers.controls.Alert;
 	import feathers.controls.Label;
 	import feathers.controls.Button;
 	import feathers.controls.LayoutGroup;
 	import feathers.controls.TextCallout;
 	import feathers.controls.text.TextBlockTextRenderer;
+
+	import feathers.data.ArrayCollection;
 
 	import feathers.layout.VerticalAlign;
 	import feathers.layout.HorizontalAlign;
@@ -99,45 +103,74 @@ CONFIG::use_teak_to_register_notifications {
 		private function rewardHandler(e:TeakEvent):void
 		{
 			Teak.instance.log("Reward:\n" + e.data);
-			TextCallout.show("Reward:\n" + e.data, currentTestButton);
-			var payload:Object = JSON.parse(e.data);
 
+			var payload:Object = JSON.parse(e.data);
+			var popupTitle:String = "Reward";
+			var popupMessage:String = "";
 			switch (payload.status as String) {
 				case "grant_reward": {
 					// The user has been issued this reward by Teak
+					popupTitle = "Reward Granted";
+					popupMessage = "You got: ";
+					var isFirst:Boolean = true;
+					for(var i:String in payload.reward) {
+						if(isFirst) {
+							isFirst = false;
+						} else {
+							popupMessage += " and ";
+						}
+						popupMessage += payload.reward[i] + " " + i;
+					}
 				}
 				break;
 
 				case "self_click": {
 					// The user has attempted to claim a reward from their own social post
+					popupTitle = "Self Click";
+					popupMessage = "The user has attempted to claim a reward from their own social post";
 				}
 				break;
 
 				case "already_clicked": {
 					// The user has already been issued this reward
+					popupTitle = "Already Clicked";
+					popupMessage = "The user has already been issued this reward";
 				}
 				break;
 
 				case "too_many_clicks": {
 					// The reward has already been claimed its maximum number of times globally
+					popupTitle = "Too Many Clicks";
+					popupMessage = "The reward has already been claimed its maximum number of times globally";
 				}
 				break;
 
 				case "exceed_max_clicks_for_day": {
 					// The user has already claimed their maximum number of rewards of this type for the day
+					popupTitle = "Exceed Max Clicks for Day";
+					popupMessage = "The user has already claimed their maximum number of rewards of this type for the day";
 				}
 				break;
 
 				case "expired": {
 					// This reward has expired and is no longer valid
+					popupTitle = "Expired";
+					popupMessage = "This reward has expired and is no longer valid";
 				}
 				break;
 
 				case "invalid_post": {
-					//Teak does not recognize this reward id
+					// Teak does not recognize this reward id
+					popupTitle = "Invalid Post";
+					popupMessage = "Teak does not recognize this reward id";
 				}
 				break;
 			}
+
+			var alert:Alert = Alert.show(popupMessage, popupTitle, new ArrayCollection(
+			[
+				{ label: "Ok" }
+			]));
 
 			if(currentTestIndex > -1 && tests[currentTestIndex].OnReward(payload))
 			{

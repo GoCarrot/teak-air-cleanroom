@@ -140,6 +140,9 @@ platform :ios do
               #sh "security set-key-partition-list -S apple-tool:,apple: -s -k #{keychain_pass} #{keychain_name}"
               sh "security unlock-keychain -p #{keychain_pass} #{keychain_name}"
 
+              # HAX
+              sh "security list-keychains"
+
               # Re-sign extension
               sh "codesign -f -s \"#{signing_identity}\" --keychain #{keychain_name} --entitlements #{extension}.plist #{extension}.appex"
 

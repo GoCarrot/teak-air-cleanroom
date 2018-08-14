@@ -139,6 +139,9 @@ platform :ios do
           # Copy in provisioning profile
           sh "cp \"#{provisioning_profile}\" #{extension}.appex/embedded.mobileprovision"
 
+          # HAX
+          sh "security find-identity -v -p codesigning"
+
           # Re-sign extension
           sh "codesign -f -s \"#{signing_identity}\" --entitlements #{extension}.plist #{extension}.appex"
 

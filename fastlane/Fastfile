@@ -83,67 +83,76 @@ platform :ios do
 
         app_dir = File.basename(Dir.glob("#{tmpdir}/Payload/*.app").first)
 
-        # Use Match to get the signing id into the temp keychain
-        match(
-          app_identifier: TEAK_AIR_CLEANROOM_BUNDLE_ID,
-          type: CONFIG_TYPE,
-          readonly: true,
-          git_url: git_url
-        )
-
         # Add/configure app extensions
         FileUtils.mkdir "#{tmpdir}/Payload/#{app_dir}/PlugIns"
         TEAK_APP_EXTENSIONS.each do |extension|
           # Per-extension bundle id
           app_extension_bundle_id = "#{TEAK_AIR_CLEANROOM_BUNDLE_ID}.#{extension}"
 
-          # Use Match to get the provisioning profiles into the temp keychain
-          match(
-            app_identifier: app_extension_bundle_id,
-            type: CONFIG_TYPE,
-            readonly: true,
-            git_url: git_url
-          )
-          provisioning_profile_env = Match::Utils.environment_variable_name_profile_path(
-            app_identifier: app_extension_bundle_id,
-            type: CONFIG_TYPE
-          )
-          provisioning_profile = ENV[provisioning_profile_env]
+          Helper::TeakHelper.with_credentials_for("#{app_extension_bundle_id}") do |p12_file, p12_password, mobileprovision, keychain_name, keychain_pass|
+            # Use Match to get the signing id into the temp keychain
+            match(
+              app_identifier: TEAK_AIR_CLEANROOM_BUNDLE_ID,
+              type: CONFIG_TYPE,
+              readonly: true,
+              git_url: git_url
+            )
 
-          # Prepare extension
-          Dir.chdir("#{tmpdir}/Payload/#{app_dir}/PlugIns") do
-            # Download & Unzip extension
-            sh "curl --fail -o \"#{extension}.appex.zip\" https://sdks.teakcdn.com/ios/#{extension}-#{appex_version}.appex.zip"
-            sh "unzip \"#{extension}.appex.zip\""
-            sh "rm \"#{extension}.appex.zip\""
+            # Use Match to get the provisioning profiles into the temp keychain
+            match(
+              app_identifier: app_extension_bundle_id,
+              type: CONFIG_TYPE,
+              readonly: true,
+              git_url: git_url
+            )
+            provisioning_profile_env = Match::Utils.environment_variable_name_profile_path(
+              app_identifier: app_extension_bundle_id,
+              type: CONFIG_TYPE
+            )
+            provisioning_profile = ENV[provisioning_profile_env]
 
-            # Extract entitlements
-            sh "codesign -d --entitlements :#{extension}.plist #{extension}.appex/"
-            sh "plutil -p #{extension}.plist"
+            # Prepare extension
+            Dir.chdir("#{tmpdir}/Payload/#{app_dir}/PlugIns") do
+              # Download & Unzip extension
+              sh "curl --fail -o \"#{extension}.appex.zip\" https://sdks.teakcdn.com/ios/#{extension}-#{appex_version}.appex.zip"
+              sh "unzip \"#{extension}.appex.zip\""
+              sh "rm \"#{extension}.appex.zip\""
 
-            # Modify entitlements
-            sh "plutil -replace \"application-identifier\" -string \"#{team_id}.#{app_extension_bundle_id}\" #{extension}.plist"
-            sh "plutil -replace \"com\\.apple\\.developer\\.team-identifier\" -string \"#{team_id}\" #{extension}.plist"
-            # TODO: com.apple.developer.associated-domains properly
-            begin
-              sh "plutil -remove \"com\\.apple\\.developer\\.associated-domains\" #{extension}.plist"
-            rescue
+              # Extract entitlements
+              sh "codesign -d --entitlements :#{extension}.plist #{extension}.appex/"
+              sh "plutil -p #{extension}.plist"
+
+              # Modify entitlements
+              sh "plutil -replace \"application-identifier\" -string \"#{team_id}.#{app_extension_bundle_id}\" #{extension}.plist"
+              sh "plutil -replace \"com\\.apple\\.developer\\.team-identifier\" -string \"#{team_id}\" #{extension}.plist"
+              # TODO: com.apple.developer.associated-domains properly
+              begin
+                sh "plutil -remove \"com\\.apple\\.developer\\.associated-domains\" #{extension}.plist"
+              rescue
+              end
+
+              # Remove _CodeSignature or re-sign will fail
+              sh "rm -fr #{extension}.appex/_CodeSignature"
+
+              # Modify Info.plist
+              sh "plutil -replace CFBundleIdentifier -string \"#{app_extension_bundle_id}\" #{extension}.appex/Info.plist"
+
+              # Copy in provisioning profile
+              sh "cp \"#{provisioning_profile}\" #{extension}.appex/embedded.mobileprovision"
+
+              # Unlock keychain
+              #sh "security set-key-partition-list -S apple-tool:,apple: -s -k #{keychain_pass} #{keychain_name}"
+              sh "security unlock-keychain -p #{keychain_pass} #{keychain_name}"
+
+              # HAX
+              sh "security list-keychains"
+
+              # Re-sign extension
+              sh "codesign -f -s \"#{signing_identity}\" --keychain #{keychain_name} --entitlements #{extension}.plist #{extension}.appex"
+
+              # Cleanup
+              sh "rm #{extension}.plist"
             end
-
-            # Remove _CodeSignature or re-sign will fail
-            sh "rm -fr #{extension}.appex/_CodeSignature"
-
-            # Modify Info.plist
-            sh "plutil -replace CFBundleIdentifier -string \"#{app_extension_bundle_id}\" #{extension}.appex/Info.plist"
-
-            # Copy in provisioning profile
-            sh "cp \"#{provisioning_profile}\" #{extension}.appex/embedded.mobileprovision"
-
-            # Re-sign extension
-            sh "codesign -f -s \"#{signing_identity}\" --entitlements #{extension}.plist #{extension}.appex"
-
-            # Cleanup
-            sh "rm #{extension}.plist"
           end
         end
 

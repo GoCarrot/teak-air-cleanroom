@@ -95,7 +95,8 @@ platform :ios do
               app_identifier: TEAK_AIR_CLEANROOM_BUNDLE_ID,
               type: CONFIG_TYPE,
               readonly: true,
-              git_url: git_url
+              git_url: git_url,
+              keychain_name: keychain_name
             )
 
             # Use Match to get the provisioning profiles into the temp keychain
@@ -103,7 +104,8 @@ platform :ios do
               app_identifier: app_extension_bundle_id,
               type: CONFIG_TYPE,
               readonly: true,
-              git_url: git_url
+              git_url: git_url,
+              keychain_name: keychain_name
             )
             provisioning_profile_env = Match::Utils.environment_variable_name_profile_path(
               app_identifier: app_extension_bundle_id,

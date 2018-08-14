@@ -98,7 +98,7 @@ platform :ios do
           )
           provisioning_profile = ENV[provisioning_profile_env]
 
-          Helper::TeakHelper.with_credentials_for("#{app_extension_bundle_id}") do |p12_file, p12_password, mobileprovision|
+          Helper::TeakHelper.with_credentials_for("#{app_extension_bundle_id}") do |p12_file, p12_password, mobileprovision, keychain_name|
             Dir.chdir("#{tmpdir}/Payload/#{app_dir}/PlugIns") do
               # Download & Unzip extension
               sh "curl --fail -o \"#{extension}.appex.zip\" https://sdks.teakcdn.com/ios/#{extension}-#{appex_version}.appex.zip"
@@ -128,7 +128,7 @@ platform :ios do
               sh "cp \"#{provisioning_profile}\" #{extension}.appex/embedded.mobileprovision"
 
               # Re-sign extension
-              sh "codesign -f -s \"#{signing_identity}\" --entitlements #{extension}.plist #{extension}.appex"
+              sh "codesign -f -s \"#{signing_identity}\" --keychain #{keychain_name} --entitlements #{extension}.plist #{extension}.appex"
 
               # Cleanup
               sh "rm #{extension}.plist"

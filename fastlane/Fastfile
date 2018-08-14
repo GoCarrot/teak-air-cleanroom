@@ -147,8 +147,7 @@ platform :ios do
               sh "security unlock-keychain -p #{keychain_pass} #{keychain_name}"
 
               # HAX
-              sh "security list-keychains"
-              sh "security find-identity -v -p codesigning"
+              sh "security find-identity -v -p codesigning #{keychain_name}"
 
               # Re-sign extension
               sh "codesign -f -s \"#{signing_identity}\" --keychain #{keychain_name} --entitlements #{extension}.plist #{extension}.appex"

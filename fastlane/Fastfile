@@ -85,7 +85,7 @@ platform :ios do
           # Per-extension bundle id
           app_extension_bundle_id = "#{TEAK_AIR_CLEANROOM_BUNDLE_ID}.#{extension}"
 
-          Helper::TeakHelper.with_credentials_for("#{app_extension_bundle_id}") do |p12_file, p12_password, mobileprovision, keychain_name|
+          Helper::TeakHelper.with_credentials_for("#{app_extension_bundle_id}") do |p12_file, p12_password, mobileprovision, keychain_name, keychain_pass|
             # Use Match to get the signing id into the temp keychain
             match(
               app_identifier: TEAK_AIR_CLEANROOM_BUNDLE_ID,
@@ -135,6 +135,9 @@ platform :ios do
 
               # Copy in provisioning profile
               sh "cp \"#{provisioning_profile}\" #{extension}.appex/embedded.mobileprovision"
+
+              # Unlock keychain
+              sh "security set-key-partition-list -S apple-tool:,apple: -s -k #{keychain_pass} #{keychain_name}"
 
               # Re-sign extension
               sh "codesign -f -s \"#{signing_identity}\" --keychain #{keychain_name} --entitlements #{extension}.plist #{extension}.appex"

@@ -63,9 +63,7 @@ platform :ios do
     git_url = 'git@github.com:GoCarrot/teak-match-certificates.git'
 
     Dir.chdir('..') do
-      app_mobileprovision_path = nil
       Helper::TeakHelper.with_credentials_for(TEAK_AIR_CLEANROOM_BUNDLE_ID) do |p12_file, p12_password, mobileprovision|
-        app_mobileprovision_path = mobileprovision
         adt "-package", "-target", "ipa-debug", #"-embedBitcode", "yes",
           "-keystore", p12_file, "-storetype", "pkcs12", "-storepass", p12_password,
           "-provisioning-profile", mobileprovision,
@@ -88,15 +86,23 @@ platform :ios do
           app_extension_bundle_id = "#{TEAK_AIR_CLEANROOM_BUNDLE_ID}.#{extension}"
 
           Helper::TeakHelper.with_credentials_for("#{app_extension_bundle_id}") do |p12_file, p12_password, mobileprovision, keychain_name|
+            # Use Match to get the signing id into the temp keychain
+            match(
+              app_identifier: TEAK_AIR_CLEANROOM_BUNDLE_ID,
+              type: CONFIG_TYPE,
+              readonly: true,
+              git_url: git_url
+            )
+
             # Use Match to get the provisioning profiles into the temp keychain
             match(
-              app_identifier: "#{app_extension_bundle_id}",
+              app_identifier: app_extension_bundle_id,
               type: CONFIG_TYPE,
               readonly: true,
               git_url: git_url
             )
             provisioning_profile_env = Match::Utils.environment_variable_name_profile_path(
-              app_identifier: "#{app_extension_bundle_id}",
+              app_identifier: app_extension_bundle_id,
               type: CONFIG_TYPE
             )
             provisioning_profile = ENV[provisioning_profile_env]
@@ -139,28 +145,30 @@ platform :ios do
           end
         end
 
-        Dir.chdir(tmpdir) do
-          # Replace embedded provisioning profile
-          sh "cp \"#{app_mobileprovision_path}\" Payload/#{app_dir}/embedded.mobileprovision"
+        Helper::TeakHelper.with_credentials_for(TEAK_AIR_CLEANROOM_BUNDLE_ID) do |p12_file, p12_password, mobileprovision|
+          Dir.chdir(tmpdir) do
+            # Replace embedded provisioning profile
+            sh "cp \"#{mobileprovision}\" Payload/#{app_dir}/embedded.mobileprovision"
 
-          # Extract entitlements from app
-          sh "codesign -d --entitlements :entitlements.plist Payload/#{app_dir}"
+            # Extract entitlements from app
+            sh "codesign -d --entitlements :entitlements.plist Payload/#{app_dir}"
 
-          # Re-sign embedded frameworks (if there are any)
-          begin
-            sh "codesign -f -s \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}/Frameworks/*"
-          rescue
+            # Re-sign embedded frameworks (if there are any)
+            begin
+              sh "codesign -f -s \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}/Frameworks/*"
+            rescue
+            end
+
+            # Re-sign app
+            sh "codesign -f -s \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}"
+
+            # Re-zip
+            sh "zip -qr teak-air-cleanroom.ipa Payload"
+
+            # Cleanup
+            sh "rm entitlements.plist"
+            sh "rm -r Payload/"
           end
-
-          # Re-sign app
-          sh "codesign -f -s \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}"
-
-          # Re-zip
-          sh "zip -qr teak-air-cleanroom.ipa Payload"
-
-          # Cleanup
-          sh "rm entitlements.plist"
-          sh "rm -r Payload/"
         end
         FileUtils.cp "#{tmpdir}/teak-air-cleanroom.ipa", 'build/teak-air-cleanroom.ipa'
       end

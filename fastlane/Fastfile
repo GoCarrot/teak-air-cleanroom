@@ -150,7 +150,7 @@ platform :ios do
               sh "ls"
 
               # Re-sign extension
-              sh "codesign --verbose --force --sign \"#{signing_identity}\" --keychain #{keychain_name} --entitlements #{extension}.plist #{extension}.appex"
+              sh "codesign --force --sign \"#{signing_identity}\" --keychain #{keychain_name} --entitlements #{extension}.plist #{extension}.appex"
 
               # Cleanup
               sh "rm #{extension}.plist"

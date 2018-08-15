@@ -133,13 +133,11 @@ platform :ios do
       FileUtils.cp "#{tmpdir}/teak-air-cleanroom.ipa", '../build/teak-air-cleanroom.ipa'
     end
 
+    # Match
+    match
+
     # Build hash of provisioning profiles needed
     provisioning_profiles = {}
-    match(
-      app_identifier: TEAK_AIR_CLEANROOM_BUNDLE_ID,
-      type: CONFIG_TYPE,
-      readonly: true
-    )
     provisioning_profile_env = Match::Utils.environment_variable_name_profile_path(
       app_identifier: TEAK_AIR_CLEANROOM_BUNDLE_ID,
       type: CONFIG_TYPE
@@ -148,11 +146,6 @@ platform :ios do
 
     TEAK_APP_EXTENSIONS.each do |extension|
       app_extension_bundle_id = "#{TEAK_AIR_CLEANROOM_BUNDLE_ID}.#{extension}"
-      match(
-        app_identifier: app_extension_bundle_id,
-        type: CONFIG_TYPE,
-        readonly: true
-      )
       provisioning_profile_env = Match::Utils.environment_variable_name_profile_path(
         app_identifier: app_extension_bundle_id,
         type: CONFIG_TYPE

@@ -79,8 +79,7 @@ platform :ios do
     team_id = "7FLZTACJ82"
 
     Dir.mktmpdir do |tmpdir|
-      # Unzip to tmpdir
-      sh "ls"
+      # Unzip IPA to tmpdir
       sh "unzip -q ../build/teak-air-cleanroom.ipa -d #{tmpdir}"
       FileUtils.rm '../build/teak-air-cleanroom.ipa'
 

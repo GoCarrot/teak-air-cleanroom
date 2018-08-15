@@ -142,19 +142,17 @@ platform :ios do
 
     # Build hash of provisioning profiles needed
     provisioning_profiles = {}
-    provisioning_profile_env = Match::Utils.environment_variable_name_profile_path(
+    provisioning_profiles[TEAK_AIR_CLEANROOM_BUNDLE_ID] = ENV[Match::Utils.environment_variable_name_profile_path(
       app_identifier: TEAK_AIR_CLEANROOM_BUNDLE_ID,
       type: CONFIG_TYPE
-    )
-    provisioning_profiles[TEAK_AIR_CLEANROOM_BUNDLE_ID] = ENV[provisioning_profile_env]
+    )]
 
     TEAK_APP_EXTENSIONS.each do |extension|
       app_extension_bundle_id = "#{TEAK_AIR_CLEANROOM_BUNDLE_ID}.#{extension}"
-      provisioning_profile_env = Match::Utils.environment_variable_name_profile_path(
+      provisioning_profiles[app_extension_bundle_id] = ENV[Match::Utils.environment_variable_name_profile_path(
         app_identifier: app_extension_bundle_id,
         type: CONFIG_TYPE
-      )
-      provisioning_profiles[app_extension_bundle_id] = ENV[provisioning_profile_env]
+      )]
     end
 
     # The 'resign' command calls a bash script located @ gems/fastlane-2.101.1/sigh/lib/assets/resign.sh

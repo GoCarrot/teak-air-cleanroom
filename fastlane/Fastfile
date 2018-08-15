@@ -121,8 +121,7 @@ platform :ios do
               sh "rm \"#{extension}.appex.zip\""
 
               # Extract entitlements
-              sh "codesign -d --entitlements :#{extension}.plist #{extension}.appex/"
-              sh "plutil -p #{extension}.plist"
+              sh "codesign --display --entitlements :#{extension}.plist #{extension}.appex/"
 
               # Modify entitlements
               sh "plutil -replace \"application-identifier\" -string \"#{team_id}.#{app_extension_bundle_id}\" #{extension}.plist"
@@ -165,16 +164,16 @@ platform :ios do
             sh "cp \"#{mobileprovision}\" Payload/#{app_dir}/embedded.mobileprovision"
 
             # Extract entitlements from app
-            sh "codesign -d --entitlements :entitlements.plist Payload/#{app_dir}"
+            sh "codesign --display --entitlements :entitlements.plist Payload/#{app_dir}"
 
             # Re-sign embedded frameworks (if there are any)
             begin
-              sh "codesign -f -s \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}/Frameworks/*"
+              sh "codesign --force --sign \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}/Frameworks/*"
             rescue
             end
 
             # Re-sign app
-            sh "codesign -f -s \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}"
+            sh "codesign --force --sign \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}"
 
             # Re-zip
             sh "zip -qr teak-air-cleanroom.ipa Payload"

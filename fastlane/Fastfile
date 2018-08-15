@@ -150,7 +150,8 @@ platform :ios do
               sh "ls"
 
               # Re-sign extension
-              sh "codesign --force --sign \"#{signing_identity}\" --keychain #{keychain_name} --entitlements #{extension}.plist #{extension}.appex"
+              # HAX #{signing_identity} just see if we can CI signing with ad-hoc
+              sh "codesign --force --sign \"-\" --keychain #{keychain_name} --entitlements #{extension}.plist #{extension}.appex"
 
               # Cleanup
               sh "rm #{extension}.plist"

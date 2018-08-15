@@ -60,14 +60,8 @@ platform :ios do
   end
 
   lane :build do
-    # hax
-    signing_identity = "iPhone Developer: Teak Devices (U756J7538G)"
-    team_id = "7FLZTACJ82"
-    appex_version = '0.20.0'
-    git_url = 'git@github.com:GoCarrot/teak-match-certificates.git'
-
-    Dir.chdir('..') do
-      Helper::TeakHelper.with_credentials_for(TEAK_AIR_CLEANROOM_BUNDLE_ID) do |p12_file, p12_password, mobileprovision|
+    Helper::TeakHelper.with_credentials_for(TEAK_AIR_CLEANROOM_BUNDLE_ID) do |p12_file, p12_password, mobileprovision|
+      Dir.chdir('..') do
         adt "-package", "-target", "ipa-debug", #"-embedBitcode", "yes",
           "-keystore", p12_file, "-storetype", "pkcs12", "-storepass", p12_password,
           "-provisioning-profile", mobileprovision,
@@ -75,114 +69,104 @@ platform :ios do
           "-C", "src/assets", "teak-ea-icon-square-1024x1024.png", "teak-ea-icon-square-144x144.png",
           "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
       end
+    end
+  end
 
-      Dir.mktmpdir do |tmpdir|
-        # Unzip to tmpdir
-        sh "unzip -q build/teak-air-cleanroom.ipa -d #{tmpdir}"
-        FileUtils.rm 'build/teak-air-cleanroom.ipa'
+  lane :repack do
+    # hax
+    appex_version = '0.20.0'
+    team_id = "7FLZTACJ82"
 
-        app_dir = File.basename(Dir.glob("#{tmpdir}/Payload/*.app").first)
+    Dir.mktmpdir do |tmpdir|
+      # Unzip to tmpdir
+      sh "ls"
+      sh "unzip -q ../build/teak-air-cleanroom.ipa -d #{tmpdir}"
+      FileUtils.rm '../build/teak-air-cleanroom.ipa'
 
-        # Add/configure app extensions
-        FileUtils.mkdir "#{tmpdir}/Payload/#{app_dir}/PlugIns"
+      app_dir = File.basename(Dir.glob("#{tmpdir}/Payload/*.app").first)
+
+      # Add/configure app extensions
+      FileUtils.mkdir_p "#{tmpdir}/Payload/#{app_dir}/PlugIns"
+      Dir.chdir("#{tmpdir}/Payload/#{app_dir}/PlugIns") do
         TEAK_APP_EXTENSIONS.each do |extension|
           # Per-extension bundle id
           app_extension_bundle_id = "#{TEAK_AIR_CLEANROOM_BUNDLE_ID}.#{extension}"
+          # Download & Unzip extension
+          sh "curl --fail -o \"#{extension}.appex.zip\" https://sdks.teakcdn.com/ios/#{extension}-#{appex_version}.appex.zip"
+          sh "unzip \"#{extension}.appex.zip\""
+          sh "rm \"#{extension}.appex.zip\""
 
-          Helper::TeakHelper.with_credentials_for("#{app_extension_bundle_id}") do |p12_file, p12_password, mobileprovision, keychain_name, keychain_pass|
-            # Use Match to get the signing id into the temp keychain
-            match(
-              app_identifier: TEAK_AIR_CLEANROOM_BUNDLE_ID,
-              type: CONFIG_TYPE,
-              readonly: true,
-              git_url: git_url,
-              keychain_name: keychain_name
-            )
+          # Extract entitlements
+          sh "codesign --display --entitlements :#{extension}.plist #{extension}.appex/"
 
-            # Use Match to get the provisioning profiles into the temp keychain
-            match(
-              app_identifier: app_extension_bundle_id,
-              type: CONFIG_TYPE,
-              readonly: true,
-              git_url: git_url,
-              keychain_name: keychain_name
-            )
-            provisioning_profile_env = Match::Utils.environment_variable_name_profile_path(
-              app_identifier: app_extension_bundle_id,
-              type: CONFIG_TYPE
-            )
-            provisioning_profile = ENV[provisioning_profile_env]
-
-            # Prepare extension
-            Dir.chdir("#{tmpdir}/Payload/#{app_dir}/PlugIns") do
-              # Download & Unzip extension
-              sh "curl --fail -o \"#{extension}.appex.zip\" https://sdks.teakcdn.com/ios/#{extension}-#{appex_version}.appex.zip"
-              sh "unzip \"#{extension}.appex.zip\""
-              sh "rm \"#{extension}.appex.zip\""
-
-              # Extract entitlements
-              sh "codesign --display --entitlements :#{extension}.plist #{extension}.appex/"
-
-              # Modify entitlements
-              sh "plutil -replace \"application-identifier\" -string \"#{team_id}.#{app_extension_bundle_id}\" #{extension}.plist"
-              sh "plutil -replace \"com\\.apple\\.developer\\.team-identifier\" -string \"#{team_id}\" #{extension}.plist"
-              # TODO: com.apple.developer.associated-domains properly
-              begin
-                sh "plutil -remove \"com\\.apple\\.developer\\.associated-domains\" #{extension}.plist"
-              rescue
-              end
-
-              # Remove _CodeSignature or re-sign will fail
-              sh "rm -fr #{extension}.appex/_CodeSignature"
-
-              # Modify Info.plist
-              sh "plutil -replace CFBundleIdentifier -string \"#{app_extension_bundle_id}\" #{extension}.appex/Info.plist"
-
-              # Copy in provisioning profile
-              sh "cp \"#{provisioning_profile}\" #{extension}.appex/embedded.mobileprovision"
-
-              # Unlock keychain
-              sh "security set-key-partition-list -S apple-tool:,apple: -s -k #{keychain_pass} #{keychain_name}"
-              sh "security unlock-keychain -p #{keychain_pass} #{keychain_name}"
-
-              # HAX
-              sh "security find-identity -v -p codesigning #{keychain_name}"
-              sh "ls"
-
-              # Re-sign extension
-              # HAX #{signing_identity} just see if we can CI signing with ad-hoc
-              sh "codesign --force --sign \"-\" --keychain #{keychain_name} --entitlements #{extension}.plist #{extension}.appex"
-
-              # Cleanup
-              sh "rm #{extension}.plist"
-            end
+          # Modify entitlements
+          sh "plutil -replace \"application-identifier\" -string \"#{team_id}.#{app_extension_bundle_id}\" #{extension}.plist"
+          sh "plutil -replace \"com\\.apple\\.developer\\.team-identifier\" -string \"#{team_id}\" #{extension}.plist"
+          # TODO: com.apple.developer.associated-domains properly
+          begin
+            sh "plutil -remove \"com\\.apple\\.developer\\.associated-domains\" #{extension}.plist"
+          rescue
           end
+
+          # Remove _CodeSignature or re-sign will fail
+          sh "rm -fr #{extension}.appex/_CodeSignature"
+
+          # Modify Info.plist
+          sh "plutil -replace CFBundleIdentifier -string \"#{app_extension_bundle_id}\" #{extension}.appex/Info.plist"
+
+          # Re-sign extension, ad-hoc just to get modified entitlements back in there
+          sh "codesign --force --sign \"-\" --entitlements #{extension}.plist #{extension}.appex"
+
+          # Cleanup
+          sh "rm #{extension}.plist"
         end
-
-        Helper::TeakHelper.with_credentials_for(TEAK_AIR_CLEANROOM_BUNDLE_ID) do |p12_file, p12_password, mobileprovision|
-          Dir.chdir(tmpdir) do
-            # Replace embedded provisioning profile
-            sh "cp \"#{mobileprovision}\" Payload/#{app_dir}/embedded.mobileprovision"
-
-            # Extract entitlements from app
-            sh "codesign --display --entitlements :entitlements.plist Payload/#{app_dir}"
-
-            # Re-sign app, let '--deep' take care of Frameworks
-            sh "codesign --force --deep --sign \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}"
-
-            # Re-zip
-            sh "zip -qr teak-air-cleanroom.ipa Payload"
-
-            # Cleanup
-            sh "rm entitlements.plist"
-            sh "rm -r Payload/"
-          end
-        end
-        FileUtils.cp "#{tmpdir}/teak-air-cleanroom.ipa", 'build/teak-air-cleanroom.ipa'
       end
 
-      FileUtils.cp 'build/teak-air-cleanroom.ipa', 'teak-air-cleanroom.ipa'
+      Dir.chdir(tmpdir) do
+        # Re-zip
+        sh "zip -qr teak-air-cleanroom.ipa Payload"
+
+        # Cleanup
+        sh "rm -r Payload/"
+      end
+      FileUtils.cp "#{tmpdir}/teak-air-cleanroom.ipa", '../build/teak-air-cleanroom.ipa'
     end
+
+    # Build hash of provisioning profiles needed
+    provisioning_profiles = {}
+    match(
+      app_identifier: TEAK_AIR_CLEANROOM_BUNDLE_ID,
+      type: CONFIG_TYPE,
+      readonly: true
+    )
+    provisioning_profile_env = Match::Utils.environment_variable_name_profile_path(
+      app_identifier: TEAK_AIR_CLEANROOM_BUNDLE_ID,
+      type: CONFIG_TYPE
+    )
+    provisioning_profiles[TEAK_AIR_CLEANROOM_BUNDLE_ID] = ENV[provisioning_profile_env]
+
+    TEAK_APP_EXTENSIONS.each do |extension|
+      app_extension_bundle_id = "#{TEAK_AIR_CLEANROOM_BUNDLE_ID}.#{extension}"
+      match(
+        app_identifier: app_extension_bundle_id,
+        type: CONFIG_TYPE,
+        readonly: true
+      )
+      provisioning_profile_env = Match::Utils.environment_variable_name_profile_path(
+        app_identifier: app_extension_bundle_id,
+        type: CONFIG_TYPE
+      )
+      provisioning_profiles[app_extension_bundle_id] = ENV[provisioning_profile_env]
+    end
+
+    # The 'resign' command calls a bash script located @ gems/fastlane-2.101.1/sigh/lib/assets/resign.sh
+    resign(
+      ipa: 'build/teak-air-cleanroom.ipa',
+      signing_identity: "iPhone Developer: Teak Devices (U756J7538G)",
+      use_app_entitlements: true,
+      provisioning_profile: provisioning_profiles
+    )
+    FileUtils.cp '../build/teak-air-cleanroom.ipa', '../teak-air-cleanroom.ipa'
   end
 end
 

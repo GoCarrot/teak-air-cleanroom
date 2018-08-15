@@ -15,6 +15,7 @@ TEAK_AIR_CLEANROOM_BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'io.tea
 TEAK_AIR_CLEANROOM_APP_ID = ENV.fetch('TEAK_AIR_CLEANROOM_APP_ID', '613659812345256')
 TEAK_AIR_CLEANROOM_API_KEY = ENV.fetch('TEAK_AIR_CLEANROOM_API_KEY', '41ff00cfd4cb85702e265aa3d5ab7858')
 
+# Builtin AIR does not let us use iOS 12 Provisional (yet)
 USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION = true
 
 TEST_DISTRIQT = ENV.fetch('TEST_DISTRIQT', false)
@@ -29,7 +30,7 @@ def ci?
 end
 
 def repack?
-  ENV.fetch('REPACK', true).to_s == 'true'
+  ENV.fetch('REPACK', !ci?).to_s == 'true'
 end
 
 #

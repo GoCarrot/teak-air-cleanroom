@@ -166,14 +166,8 @@ platform :ios do
             # Extract entitlements from app
             sh "codesign --display --entitlements :entitlements.plist Payload/#{app_dir}"
 
-            # Re-sign embedded frameworks (if there are any)
-            begin
-              sh "codesign --force --sign \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}/Frameworks/*"
-            rescue
-            end
-
-            # Re-sign app
-            sh "codesign --force --sign \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}"
+            # Re-sign app, let '--deep' take care of Frameworks
+            sh "codesign --force --deep --sign \"#{signing_identity}\" --entitlements entitlements.plist Payload/#{app_dir}"
 
             # Re-zip
             sh "zip -qr teak-air-cleanroom.ipa Payload"

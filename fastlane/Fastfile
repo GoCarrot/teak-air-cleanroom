@@ -60,6 +60,7 @@ platform :ios do
   end
 
   lane :build do
+    # Build IPA
     Helper::TeakHelper.with_credentials_for(TEAK_AIR_CLEANROOM_BUNDLE_ID) do |p12_file, p12_password, mobileprovision|
       Dir.chdir('..') do
         adt "-package", "-target", "ipa-debug", #"-embedBitcode", "yes",
@@ -70,10 +71,10 @@ platform :ios do
           "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
       end
     end
-  end
 
-  lane :repack do
-    # hax
+    # Re-sign IPA
+
+    # hax, these should be determined some other way
     appex_version = '0.20.0'
     team_id = "7FLZTACJ82"
 

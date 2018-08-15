@@ -158,7 +158,6 @@ namespace :build do
 
   task ios: [:app_xml] do
     fastlane "ios", "build"
-    fastlane "ios", "repack"
   end
 end
 

@@ -148,6 +148,7 @@ platform :ios do
 
               # HAX
               sh "security find-identity -v -p codesigning #{keychain_name}"
+              sh "ls"
 
               # Re-sign extension
               sh "codesign --verbose --force --sign \"#{signing_identity}\" --keychain #{keychain_name} --entitlements #{extension}.plist #{extension}.appex"

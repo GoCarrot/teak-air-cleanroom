@@ -171,10 +171,6 @@ platform :ios do
 end
 
 platform :android do
-  before_all do
-    setup_circle_ci
-  end
-
   lane :build do
     Helper::TeakHelper.with_kms_for("../kms/io.teak.app.air.jks.data",
                                     "../kms/store_encryption_key.key") do |file|

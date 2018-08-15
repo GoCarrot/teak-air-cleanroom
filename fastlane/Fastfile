@@ -143,7 +143,7 @@ platform :ios do
               sh "cp \"#{provisioning_profile}\" #{extension}.appex/embedded.mobileprovision"
 
               # Unlock keychain
-              #sh "security set-key-partition-list -S apple-tool:,apple: -s -k #{keychain_pass} #{keychain_name}"
+              sh "security set-key-partition-list -S apple-tool:,apple: -s -k #{keychain_pass} #{keychain_name}"
               sh "security unlock-keychain -p #{keychain_pass} #{keychain_name}"
 
               # HAX

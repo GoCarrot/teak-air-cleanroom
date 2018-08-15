@@ -74,9 +74,17 @@ platform :ios do
 
     # Re-sign IPA
 
-    # hax, these should be determined some other way
+    # Run match to fetch provisioning profiles, and fill ENV
+    match
+
+    # Grab Team Id
+    team_id = ENV[Match::Utils.environment_variable_name_team_id(
+      app_identifier: TEAK_AIR_CLEANROOM_BUNDLE_ID,
+      type: CONFIG_TYPE
+    )]
+
+    # hax, should be determined some other way
     appex_version = '0.20.0'
-    team_id = "7FLZTACJ82"
 
     Dir.mktmpdir do |tmpdir|
       # Unzip IPA to tmpdir
@@ -131,9 +139,6 @@ platform :ios do
       end
       FileUtils.cp "#{tmpdir}/teak-air-cleanroom.ipa", '../build/teak-air-cleanroom.ipa'
     end
-
-    # Match
-    match
 
     # Build hash of provisioning profiles needed
     provisioning_profiles = {}

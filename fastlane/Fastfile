@@ -155,6 +155,9 @@ platform :ios do
       )]
     end
 
+    # Hax
+    sh "security find-identity -v -p codesigning"
+
     # The 'resign' command calls a bash script located @ gems/fastlane-2.101.1/sigh/lib/assets/resign.sh
     resign(
       ipa: 'build/teak-air-cleanroom.ipa',

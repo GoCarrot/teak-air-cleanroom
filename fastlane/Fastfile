@@ -55,10 +55,6 @@ lane :sdk do
 end
 
 platform :ios do
-  before_all do
-    setup_circle_ci
-  end
-
   lane :build do
     # Build IPA
     Helper::TeakHelper.with_credentials_for(TEAK_AIR_CLEANROOM_BUNDLE_ID) do |p12_file, p12_password, mobileprovision|
@@ -71,6 +67,11 @@ platform :ios do
           "Default@2x.png", "Default-568h@2x.png", "-extdir", "src/extensions"
       end
     end
+  end
+
+  lane :repack do
+    # In this lane we want the managed temporary keychain
+    setup_circle_ci
 
     # Re-sign IPA
 

@@ -79,6 +79,7 @@ CONFIG::test_distriqt_notif {
 			Teak.instance.addEventListener(TeakEvent.LAUNCHED_FROM_NOTIFICATION, launchedFromNotificationHandler);
 			Teak.instance.addEventListener(TeakEvent.ON_REWARD, rewardHandler);
 			Teak.instance.addEventListener(TeakEvent.NOTIFICATION_SCHEDULED, notificationScheduledHandler);
+			Teak.instance.addEventListener(TeakEvent.LONG_DISTANCE_NOTIFICATION_SCHEDULED, notificationScheduledHandler);
 			Teak.instance.addEventListener(TeakEvent.NOTIFICATION_CANCELED, notificationCanceledHandler);
 			Teak.instance.addEventListener(TeakEvent.NOTIFICATION_CANCEL_ALL, notificationCancelAllHandler);
 
@@ -192,7 +193,7 @@ CONFIG::use_teak_to_register_notifications {
 		{
 			TextCallout.show("Notification Scheduled (" + e.status + "):\n" + e.data, currentTestButton);
 
-			if(tests[currentTestIndex].AutoBackground)
+			if(tests[currentTestIndex].AutoBackground && e.type !== TeakEvent.LONG_DISTANCE_NOTIFICATION_SCHEDULED)
 			{
 				var request:URLRequest = new URLRequest("https://google.com");
 				navigateToURL(request);
@@ -324,6 +325,17 @@ CONFIG::use_teak_to_register_notifications {
 
 			container.addChild(testExceptionReporting);
 			testExceptionReporting.validate();
+
+			var testLongDistance:Button = new Button();
+			testLongDistance.label = "Test Long Distance"
+			testLongDistance.height = 50;
+			testLongDistance.layoutData = layoutData;
+			testLongDistance.addEventListener(Event.TRIGGERED, function(event:Event):void {
+				Teak.instance.scheduleLongDistanceNotification("test_none Local", 5, ["air-ane-lx3", "air-sm-g920t"]);
+			});
+
+			container.addChild(testLongDistance);
+			testLongDistance.validate();
 		}
 
 		protected function advanceTests():void

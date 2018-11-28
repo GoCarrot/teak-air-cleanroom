@@ -214,9 +214,17 @@
 
     <extensions>
         <extensionID>io.teak.sdk.Teak</extensionID>
-        <extensionID>com.distriqt.playservices.Base</extensionID>
-        <extensionID>com.distriqt.playservices.GCM</extensionID>
-        <extensionID>com.distriqt.androidsupport.V4</extensionID>
+
+        <extensionID>com.myflashlab.air.extensions.dependency.androidSupport.v4</extensionID>
+
+        <extensionID>com.myflashlab.air.extensions.dependency.firebase.common</extensionID>
+        <extensionID>com.myflashlab.air.extensions.dependency.firebase.iid</extensionID>
+        <extensionID>com.myflashlab.air.extensions.dependency.firebase.messaging</extensionID>
+
+        <extensionID>com.myflashlab.air.extensions.dependency.googlePlayServices.ads.lite</extensionID>
+        <extensionID>com.myflashlab.air.extensions.dependency.googlePlayServices.base</extensionID>
+        <extensionID>com.myflashlab.air.extensions.dependency.googlePlayServices.basement</extensionID>
+
         <!--<extensionID>com.freshplanet.ane.AirFacebook</extensionID>-->
     </extensions>
 </application>

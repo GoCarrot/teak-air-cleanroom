@@ -214,12 +214,6 @@
 
     <extensions>
         <extensionID>io.teak.sdk.Teak</extensionID>
-        {{#test_distriqt}}
-        <extensionID>com.distriqt.Core</extensionID>
-        {{/test_distriqt}}
-        {{#test_distriqt_notif}}
-        <extensionID>com.distriqt.PushNotifications</extensionID>
-        {{/test_distriqt_notif}}
         <extensionID>com.distriqt.playservices.Base</extensionID>
         <extensionID>com.distriqt.playservices.GCM</extensionID>
         <extensionID>com.distriqt.androidsupport.V4</extensionID>

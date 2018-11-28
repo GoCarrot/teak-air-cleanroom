@@ -20,9 +20,6 @@ TEAK_AIR_CLEANROOM_API_KEY = ENV.fetch('TEAK_AIR_CLEANROOM_API_KEY', '41ff00cfd4
 # Builtin AIR does not let us use iOS 12 Provisional (yet)
 USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION = true
 
-TEST_DISTRIQT = ENV.fetch('TEST_DISTRIQT', false)
-TEST_DISTRIQT_NOTIF = ENV.fetch('TEST_DISTRIQT_NOTIF', false)
-
 KMS_KEY = `aws kms decrypt --ciphertext-blob fileb://kms/store_encryption_key.key --output text --query Plaintext | base64 --decode`.freeze
 CIRCLE_TOKEN = ENV.fetch('CIRCLE_TOKEN') { `openssl enc -md MD5 -d -aes-256-cbc -in kms/encrypted_circle_ci_key.data -k #{KMS_KEY}` }
 FORCE_CIRCLE_BUILD_ON_FETCH = ENV.fetch('FORCE_CIRCLE_BUILD_ON_FETCH', false)
@@ -78,11 +75,7 @@ end
 
 namespace :build do
   task :air do
-    distriqt_lines = ["-define+=CONFIG::test_distriqt,#{TEST_DISTRIQT}", "-define+=CONFIG::test_distriqt_notif,#{TEST_DISTRIQT_NOTIF}"]
-    distriqt_lines << '-compiler.library-path=src/extensions/com.distriqt.Core.ane' if TEST_DISTRIQT
-    distriqt_lines << '-compiler.library-path=src/extensions/com.distriqt.PushNotifications.ane' if TEST_DISTRIQT_NOTIF
-
-    amxmlc *distriqt_lines, '-compiler.library-path=src/extensions/io.teak.sdk.Teak.ane',
+    amxmlc '-compiler.library-path=src/extensions/io.teak.sdk.Teak.ane',
            '-compiler.library-path=src/extensions/AirFacebook.ane',
            "-define+=CONFIG::use_air_to_register_notifications,#{USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION}",
            "-define+=CONFIG::use_teak_to_register_notifications,#{!USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION}",

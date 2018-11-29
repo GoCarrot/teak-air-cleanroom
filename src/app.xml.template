@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<application xmlns="http://ns.adobe.com/air/application/24.0">
+<application xmlns="http://ns.adobe.com/air/application/25.0">
 
     <id>{{bundle_id}}</id>
     <filename>teak-air-cleanroom</filename>
@@ -115,9 +115,8 @@
             <uses-permission android:name="android.permission.GET_ACCOUNTS" />
             <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
-            <permission android:name="{{bundle_id}}.permission.C2D_MESSAGE" android:protectionLevel="signature"/>
-            <uses-permission android:name="{{bundle_id}}.permission.C2D_MESSAGE"/>
-            <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+            <!-- Required by older versions of Google Play services to create IID tokens -->
+            <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
             <permission
                 android:name="{{bundle_id}}.permission.RECEIVE_ADM_MESSAGE"
@@ -129,7 +128,8 @@
             <application android:debuggable="true" {{{application}}}>
                 <meta-data android:name="io_teak_app_id" android:value="teak{{app_id}}" />
                 <meta-data android:name="io_teak_api_key" android:value="teak{{api_key}}" />
-                <meta-data android:name="io_teak_gcm_sender_id" android:value="teak944348058057" />
+                <meta-data android:name="io_teak_gcm_sender_id" android:value="teak{{gcm_id}}" />
+                <meta-data android:name="io_teak_firebase_app_id" android:value="teak{{firebase_app_id}}" />
 
                 <activity>
                     <intent-filter>
@@ -159,15 +159,14 @@
                     </intent-filter>
                 </activity>
 
-                <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+                <meta-data
+                    android:name="com.google.android.gms.version"
+                    android:value="@integer/google_play_services_version" />
 
-                <receiver android:name="io.teak.sdk.Teak" android:exported="true"
-                    android:permission="com.google.android.c2dm.permission.SEND">
+                <receiver android:name="io.teak.sdk.Teak" android:exported="false">
                     <intent-filter>
                         <action android:name="{{bundle_id}}.intent.TEAK_NOTIFICATION_OPENED" />
                         <action android:name="{{bundle_id}}.intent.TEAK_NOTIFICATION_CLEARED" />
-                        <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                        <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
                         <category android:name="{{bundle_id}}" />
                     </intent-filter>
                 </receiver>
@@ -186,17 +185,55 @@
                     </intent-filter>
                 </receiver>
 
-                <service android:name="io.teak.sdk.service.RavenService" android:process=":teak.raven" android:exported="false"/>
+                <service android:name="io.teak.sdk.service.RavenService"
+                         android:process=":teak.raven"
+                         android:exported="false"/>
 
-                <service android:name="io.teak.sdk.service.DeviceStateService" android:process=":teak.device_state" android:exported="false"/>
+                <service android:name="io.teak.sdk.service.DeviceStateService"
+                         android:process=":teak.device_state"
+                         android:exported="false"/>
 
-                <service android:name="io.teak.sdk.service.JobService" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="true"/>
+                <service android:name="io.teak.sdk.service.JobService"
+                         android:permission="android.permission.BIND_JOB_SERVICE"
+                         android:exported="true"/>
 
-                <service android:name="io.teak.sdk.InstanceIDListenerService" android:exported="false" >
+                <service android:name="io.teak.sdk.push.FCMPushProvider"
+                         android:stopWithTask="false">
                     <intent-filter>
-                        <action android:name="com.google.android.gms.iid.InstanceID" />
+                        <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                        <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
                     </intent-filter>
                 </service>
+
+                <!-- These would have been added by Firebase manifest merger -->
+                <service android:name="com.google.firebase.components.ComponentDiscoveryService"
+                         android:exported="false">
+                    <meta-data android:name="com.google.firebase.components:com.google.firebase.iid.Registrar"
+                               android:value="com.google.firebase.components.ComponentRegistrar" />
+                </service>
+
+                <receiver android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
+                          android:exported="true"
+                          android:permission="com.google.android.c2dm.permission.SEND">
+                    <intent-filter>
+                        <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                    </intent-filter>
+                </receiver>
+
+                <service android:name="com.google.firebase.iid.FirebaseInstanceIdService"
+                         android:exported="true">
+                    <intent-filter android:priority="-500">
+                        <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+                    </intent-filter>
+                </service>
+
+                <service android:name="com.google.firebase.messaging.FirebaseMessagingService"
+                         android:exported="true">
+                    <intent-filter android:priority="-500">
+                        <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                    </intent-filter>
+                </service>
+                <!-- End Firebase -->
 
                 <meta-data android:name="com.facebook.sdk.ApplicationId" 
                            android:value="fb{{app_id}}"/>
@@ -215,15 +252,18 @@
     <extensions>
         <extensionID>io.teak.sdk.Teak</extensionID>
 
+        <extensionID>com.myflashlab.air.extensions.dependency.androidSupport.arch</extensionID>
+        <extensionID>com.myflashlab.air.extensions.dependency.androidSupport.core</extensionID>
         <extensionID>com.myflashlab.air.extensions.dependency.androidSupport.v4</extensionID>
 
         <extensionID>com.myflashlab.air.extensions.dependency.firebase.common</extensionID>
         <extensionID>com.myflashlab.air.extensions.dependency.firebase.iid</extensionID>
         <extensionID>com.myflashlab.air.extensions.dependency.firebase.messaging</extensionID>
 
-        <extensionID>com.myflashlab.air.extensions.dependency.googlePlayServices.ads.lite</extensionID>
+        <extensionID>com.myflashlab.air.extensions.dependency.googlePlayServices.ads</extensionID>
         <extensionID>com.myflashlab.air.extensions.dependency.googlePlayServices.base</extensionID>
         <extensionID>com.myflashlab.air.extensions.dependency.googlePlayServices.basement</extensionID>
+        <extensionID>com.myflashlab.air.extensions.dependency.googlePlayServices.tasks</extensionID>
 
         <!--<extensionID>com.freshplanet.ane.AirFacebook</extensionID>-->
     </extensions>

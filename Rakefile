@@ -16,6 +16,8 @@ PROJECT_PATH = Rake.application.original_dir
 TEAK_AIR_CLEANROOM_BUNDLE_ID = ENV.fetch('TEAK_AIR_CLEANROOM_BUNDLE_ID', 'io.teak.app.air.dev')
 TEAK_AIR_CLEANROOM_APP_ID = ENV.fetch('TEAK_AIR_CLEANROOM_APP_ID', '613659812345256')
 TEAK_AIR_CLEANROOM_API_KEY = ENV.fetch('TEAK_AIR_CLEANROOM_API_KEY', '41ff00cfd4cb85702e265aa3d5ab7858')
+TEAK_AIR_CLEANROOM_GCM_ID = ENV.fetch('TEAK_AIR_CLEANROOM_GCM_ID', '12126273415')
+TEAK_AIR_CLEANROOM_FIREBASE_APP_ID = ENV.fetch('TEAK_AIR_CLEANROOM_FIREBASE_APP_ID', '1:12126273415:android:102329156b15bf0c')
 
 # Builtin AIR does not let us use iOS 12 Provisional (yet)
 USE_BUILTIN_AIR_NOTIFICATION_REGISTRATION = true
@@ -60,7 +62,7 @@ end
 # Tasks
 #
 task :clean do
-  sh 'git clean -fdx' unless ci?
+  #sh 'git clean -fdx' unless ci?
 end
 
 namespace :package do
@@ -88,11 +90,11 @@ namespace :build do
     template = File.read(File.join(PROJECT_PATH, 'src', 'app.xml.template'))
     File.write(File.join(PROJECT_PATH, 'src', 'app.xml'), Mustache.render(template,
                                                                           bundle_id: TEAK_AIR_CLEANROOM_BUNDLE_ID,
-                                                                          test_distriqt: TEST_DISTRIQT,
-                                                                          test_distriqt_notif: TEST_DISTRIQT_NOTIF,
                                                                           application: repack? ? '' : 'android:name="io.teak.sdk.wrapper.Application"',
                                                                           app_id: TEAK_AIR_CLEANROOM_APP_ID,
-                                                                          api_key: TEAK_AIR_CLEANROOM_API_KEY))
+                                                                          api_key: TEAK_AIR_CLEANROOM_API_KEY,
+                                                                          gcm_id: TEAK_AIR_CLEANROOM_GCM_ID,
+                                                                          firebase_app_id: TEAK_AIR_CLEANROOM_FIREBASE_APP_ID))
   end
 
   task android: [:app_xml] do

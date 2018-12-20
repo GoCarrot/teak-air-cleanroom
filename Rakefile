@@ -62,7 +62,7 @@ end
 # Tasks
 #
 task :clean do
-  #sh 'git clean -fdx' unless ci?
+  sh 'git clean -fdx' unless ci?
 end
 
 namespace :package do

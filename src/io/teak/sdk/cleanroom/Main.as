@@ -229,7 +229,7 @@ CONFIG::use_teak_to_register_notifications {
 		protected function enterFrameHandler():void
 		{
 			if (openSettingsButton) {
-				openSettingsButton.isEnabled = !Teak.instance.areNotificationsEnabled();
+				openSettingsButton.isEnabled = Teak.instance.getNotificationState() === TeakNotificationState.Disabled;
 				openSettingsButton.validate();
 			}
 		}
@@ -289,7 +289,7 @@ CONFIG::use_teak_to_register_notifications {
 			openSettingsButton.label = "Open Settings"
 			openSettingsButton.height = 50;
 			openSettingsButton.layoutData = layoutData;
-			openSettingsButton.isEnabled = !Teak.instance.areNotificationsEnabled();
+			openSettingsButton.isEnabled = Teak.instance.getNotificationState() === TeakNotificationState.Disabled;
 			openSettingsButton.addEventListener(Event.TRIGGERED, function(event:Event):void {
 				Teak.instance.openSettingsAppToThisAppsSettings();
 			});

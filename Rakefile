@@ -4,6 +4,7 @@ require 'rake/clean'
 require 'shellwords'
 require 'mustache'
 require 'httparty'
+require 'terminal-notifier'
 CLEAN.include '**/.DS_Store'
 
 desc 'Build Adobe Air package'
@@ -38,7 +39,15 @@ end
 # Play a sound after finished
 #
 at_exit do
-  sh 'afplay /System/Library/Sounds/Submarine.aiff' unless ci?
+  unless ci?
+    success = $ERROR_INFO.nil?
+    TerminalNotifier.notify(
+      Rake.application.top_level_tasks.join(', '),
+      title: 'Teak Unity Cleanroom',
+      subtitle: success ? 'Succeeded' : 'Failed',
+      sound: success ? 'Submarine' : 'Funk'
+    )
+  end
 end
 
 #

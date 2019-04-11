@@ -181,6 +181,7 @@ DEPENDENCIES
   mustache (~> 1.0)
   rake
   rubocop
+  terminal-notifier
 
 BUNDLED WITH
    1.16.6

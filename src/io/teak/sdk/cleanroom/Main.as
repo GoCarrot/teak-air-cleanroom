@@ -59,7 +59,9 @@ CONFIG::use_air_to_register_notifications {
 
 			// Add Teak event listeners
 			Teak.instance.addEventListener(TeakEvent.LAUNCHED_FROM_NOTIFICATION, launchedFromNotificationHandler);
+			Teak.instance.addEventListener(TeakEvent.ON_FOREGROUND_NOTIFICATION, foregroundNotificationHandler);
 			Teak.instance.addEventListener(TeakEvent.ON_REWARD, rewardHandler);
+			Teak.instance.addEventListener(TeakEvent.ON_LOG_EVENT, logEventHandler);
 			Teak.instance.addEventListener(TeakEvent.NOTIFICATION_SCHEDULED, notificationScheduledHandler);
 			Teak.instance.addEventListener(TeakEvent.LONG_DISTANCE_NOTIFICATION_SCHEDULED, notificationScheduledHandler);
 			Teak.instance.addEventListener(TeakEvent.NOTIFICATION_CANCELED, notificationCanceledHandler);
@@ -171,6 +173,16 @@ CONFIG::use_teak_to_register_notifications {
 			}
 		}
 
+		private function foregroundNotificationHandler(e:TeakEvent):void
+		{
+			Teak.instance.log("foregroundNotificationHandler: " + e.data);
+			TextCallout.show("foregroundNotificationHandler: " + e.data, currentTestButton);
+			if(currentTestIndex > -1 && tests[currentTestIndex].OnForegroundNotification(JSON.parse(e.data)))
+			{
+				advanceTests();
+			}
+		}
+
 		private function notificationScheduledHandler(e:TeakEvent):void
 		{
 			TextCallout.show("Notification Scheduled (" + e.status + "):\n" + e.data, currentTestButton);
@@ -190,6 +202,19 @@ CONFIG::use_teak_to_register_notifications {
 		private function notificationCancelAllHandler(e:TeakEvent):void
 		{
 			TextCallout.show("All Notifications Canceled (" + e.status + "):\n" + e.data, currentTestButton);
+		}
+
+		private function logEventHandler(e:TeakEvent):void
+		{
+			if (!lastLogEvent) {
+				var json:Object = JSON.parse(e.data);
+				lastLogEvent = JSON.stringify(json.sdk_version);
+				var label2:Label = new Label();
+				label2.text = lastLogEvent
+				label2.layoutData = layoutData;
+				label2.wordWrap = true;
+				container.addChild(label2);
+			}
 		}
 
 		private function randomNonConfusingString(length:int):String
@@ -215,6 +240,7 @@ CONFIG::use_teak_to_register_notifications {
 		protected var openSettingsButton:Button;
 		protected var container:LayoutGroup;
 		protected var layoutData:VerticalLayoutData;
+		protected var lastLogEvent:String;
 
 		// This is called when the Sprite is added to the stage, and sets up the UI
 		protected function addedToStageHandler(event:Event):void
@@ -284,6 +310,28 @@ CONFIG::use_teak_to_register_notifications {
 
 			container.addChild(userProfileTest);
 			userProfileTest.validate();
+
+			var trackEventTest:Button = new Button();
+			trackEventTest.label = "TrackEvent No_Object_Instance"
+			trackEventTest.height = 50;
+			trackEventTest.layoutData = layoutData;
+			trackEventTest.addEventListener(Event.TRIGGERED, function(event:Event):void {
+				Teak.instance.trackEvent("No_Object_Instance", null, null);
+			});
+
+			container.addChild(trackEventTest);
+			trackEventTest.validate();
+
+			var incrementEventTest:Button = new Button();
+			incrementEventTest.label = "IncrementEvent Large_Int"
+			incrementEventTest.height = 50;
+			incrementEventTest.layoutData = layoutData;
+			incrementEventTest.addEventListener(Event.TRIGGERED, function(event:Event):void {
+				Teak.instance.incrementEvent("Large_Int", "AnInt", "OneTrillionDollars", 1e12);
+			});
+
+			container.addChild(incrementEventTest);
+			incrementEventTest.validate();
 
 			openSettingsButton = new Button();
 			openSettingsButton.label = "Open Settings"
@@ -378,7 +426,8 @@ CONFIG::use_teak_to_register_notifications {
 			new Test("Simple Notification", "test_none"),
 			new Test("Deep Link", "test_deeplink", "link-only"),
 			new Test("Reward", "test_reward", null, {"coins": 1000}),
-			new Test("Reward + Deep Link", "test_rewarddeeplink", "with-reward", {"coins": 1000})
+			new Test("Reward + Deep Link", "test_rewarddeeplink", "with-reward", {"coins": 1000}),
+			new Test("Foreground Notification", "test_none", null, null, false)
 		];
 	}
 }

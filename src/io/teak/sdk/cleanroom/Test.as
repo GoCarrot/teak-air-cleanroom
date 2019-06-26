@@ -16,12 +16,13 @@ package io.teak.sdk.cleanroom
 		public var Name:String;
 		public var CreativeId:String;
 
-		public function Test(name:String, creativeId:String, verifyDeepLink:String = null, verifyReward:Object = null)
+		public function Test(name:String, creativeId:String, verifyDeepLink:String = null, verifyReward:Object = null, autoBackground:Boolean = true)
 		{
 			this.Name = name;
 			this.CreativeId = creativeId;
 			this.VerifyDeepLink = verifyDeepLink;
-			this.VerifyReward = verifyReward
+			this.VerifyReward = verifyReward;
+			this.AutoBackground = autoBackground;
 		}
 
 		protected function Prepare():void
@@ -86,6 +87,24 @@ package io.teak.sdk.cleanroom
 			else if(this.VerifyReward && !parameters.incentivized)
 			{
 				this.Error = "Notification Launch: 'incentivized' was false, should have been true";
+				this.Status = 2;
+			}
+
+			Prepare();
+			this.onLaunchCalled = true;
+			return CheckStatus();
+		}
+
+		public function OnForegroundNotification(parameters:Object):Boolean
+		{
+			if(!parameters.teakCreativeName || parameters.teakCreativeName != this.CreativeId)
+			{
+				this.Error = "Foreground Notification: teakCreativeName mismatch, should be '" + this.CreativeId + "' found: '" + parameters.teakCreativeName + "'";
+				this.Status = 2;
+			}
+			else if(this.VerifyReward && !parameters.incentivized)
+			{
+				this.Error = "Foreground Notification: 'incentivized' was false, should have been true";
 				this.Status = 2;
 			}
 

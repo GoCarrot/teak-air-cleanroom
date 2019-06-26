@@ -80,7 +80,7 @@ namespace :package do
   end
 
   task copy: [:clean] do
-    fastlane 'sdk', env: { FL_TEAK_SDK_SOURCE: '../teak-air/' }
+    fastlane 'sdk', env: { FL_TEAK_SDK_SOURCE: "#{PROJECT_PATH}/../teak-air/bin" }
   end
 end
 
